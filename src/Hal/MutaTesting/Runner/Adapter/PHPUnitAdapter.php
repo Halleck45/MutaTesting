@@ -50,7 +50,7 @@ class PHPUnitAdapter extends AdapterAbstract implements AdapterInterface
     public function analyzeTestedFiles(UnitInterface &$test)
     {
         // run only the test
-        // adding a php auto_preprend_file with register_shutdown_function, storing included
+        // adding a php auto_preprend_file with register_shutdown_function, storing included in a temp file
 
         $filename = tempnam(sys_get_temp_dir(), 'tested-files');
         $appendingContent = '<?php
@@ -60,7 +60,7 @@ register_shutdown_function(function() {
             ';
         $bootstrapName = tempnam(sys_get_temp_dir(), 'bootstrap');
         file_put_contents($bootstrapName, $appendingContent);
-        // @todo remove this fixe
+        // @todo inverse the following lines
         // We should use auto_prepend_file ini directive
         // but there is a bug ?! when we use the directeive with a phar 
         // $options = array(sprintf('-d auto_prepend_file=%s', $bootstrapName));
