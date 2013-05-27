@@ -1,0 +1,27 @@
+{
+    "name": "MutaTesing",
+    "description": "mutation testing tool for PHP",
+    "keywords": ["test", "unit", "mutating testing"],
+    "type": "library",
+    "licence": "MIT",
+    "author": [
+        {
+            "name": " Jean-François Lépine",
+            "email": " lepinejeanfrancois@yahoo.fr",
+            "homepage": " http://blog.lepine.pro"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "symfony/console": "~2.0",
+        "symfony/config": "~2.0",
+        "symfony/dependency-injection": "~2.0",
+        "symfony/finder": "~2.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Hal\\MutaTesting": "src/"
+        }
+    },
+    "bin": ["bin/mutatesting"]
+}
