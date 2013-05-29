@@ -2,98 +2,67 @@
 
 namespace Hal\MutaTesting\Runner\Adapter;
 
-
-use Hal\MutaTesting\Test\Collection\Factory\JUnitFactory;
-use Hal\MutaTesting\Test\UnitCollectionInterface;
+use Hal\MutaTesting\Mutation\Factory\MutationFactory;
 use Hal\MutaTesting\Test\UnitInterface;
 
-class PHPUnitAdapter extends AdapterAbstract implements AdapterInterface
+class PHPUnitAdapter extends BaseAdapter implements AdapterInterface
 {
 
-    public function run($path = null, array $options = array())
+    /**
+     * @inherit
+     */
+    public function run($path = null, array $options = array(), $logFile = null, $prependFile = null)
     {
-
-        if (is_null($path)) {
-            $path = $this->getTestDirectory();
+        if (!is_null($logFile)) {
+            array_push($options, sprintf('--log-junit %s', $logFile));
         }
 
-        $binary = escapeshellcmd($this->getBinary());
-        $options = array_merge($this->getOptions(), $options);
-
-        $args = '';
-        foreach ($options as $option) {
-            $args .= ' ' . $option;
+        if (!is_null($prependFile)) {
+            // @todo inverse the following lines
+            // We should use auto_prepend_file ini directive
+            // but there is a bug ?! when we use the directeive with PHPUnit as phar
+            // $options = array(sprintf('-d auto_prepend_file=%s', $bootstrapName));
+            array_push($options, sprintf('--bootstrap %s', $prependFile));
         }
-        $output = shell_exec("$binary $args $path");
-        return $output;
+        return parent::run($path, $options);
     }
 
-    public function runTests(UnitCollectionInterface $collection, array $options = array())
+    /**
+     * Parse tested files of the unit test and injects them in Unit::setTestedFiles()
+     * 
+     * @param \Hal\MutaTesting\Test\UnitInterface $unit
+     * @return \Hal\MutaTesting\Test\UnitInterface
+     */
+    public function parseTestedFiles(UnitInterface &$unit)
     {
-        $path = '';
-        foreach ($collection->all() as $unit) {
-            $path.= ' ' . $unit->GetFile();
-        }
-        $this->run($path, $options);
-    }
 
-    public function getTestSuites()
-    {
-        $filename = tempnam(sys_get_temp_dir(), 'mutator-tests-suites');
-        $options = array(sprintf('--log-junit %s', $filename));
-        $this->run($this->getTestDirectory(), $options);
+        $factory = new MutationFactory;
+        $mutation = $factory->factoryFromUnit($unit);
 
-        $factory = new JUnitFactory;
-        return $factory->factory(file_get_contents($filename));
-    }
+        $prependFile = $this->createFileSystemMock($mutation);
 
-    public function analyzeTestedFiles(UnitInterface &$test)
-    {
-        // run only the test
-        // adding a php auto_preprend_file with register_shutdown_function, storing included in a temp file
-
+        // add logger
         $filename = tempnam(sys_get_temp_dir(), 'tested-files');
-        $appendingContent = '<?php
-register_shutdown_function(function() {
-    file_put_contents(\'' . $filename . '\', serialize( get_included_files() ));
-});
-            ';
-        $bootstrapName = tempnam(sys_get_temp_dir(), 'bootstrap');
-        file_put_contents($bootstrapName, $appendingContent);
-        // @todo inverse the following lines
-        // We should use auto_prepend_file ini directive
-        // but there is a bug ?! when we use the directeive with a phar 
-        // $options = array(sprintf('-d auto_prepend_file=%s', $bootstrapName));
-        $options = array(sprintf('--bootstrap %s', $bootstrapName));
-        $this->run($test->getFile(), $options);
+        $content = '<?php
+            register_shutdown_function(function() {
+                file_put_contents(\'' . $filename . '\', serialize( get_included_files() ));
+            });';
+        file_put_contents($prependFile, $content, FILE_APPEND);
 
+        // run mutation
+        $this->runMutation($mutation, array(), null, $prependFile);
 
-        // remove internal files
+        // get files
         $includedExport = unserialize(file_get_contents($filename));
-        $files = array();
-        foreach ($includedExport as $key => $file) {
-            if (preg_match('!PHPUnit!', $file)) {
-                continue;
-            }
-            if (preg_match('!Test.php$!', $file)) {
-                continue;
-            }
-            if (preg_match('!phpunit.phar!i', $file)) {
-                continue;
-            }
-            if (in_array($file, array($bootstrapName, $filename))) {
-                continue;
-            }
-            array_push($files, $file);
-        }
+        $includedFiles = array_filter($includedExport, function($file) use($prependFile, $filename) {
+                    return
+                            !preg_match('!(PHPUnit)|(Test.php)|(phpunit.phar)!', $file) && !in_array($file, array($prependFile, $filename));
+                });
+        $unit->setTestedFiles(array_values($includedFiles));
 
-        $test->setTestedFiles($files);
-
-        unlink($bootstrapName);
+        unlink($prependFile);
         unlink($filename);
-        unset($files);
-        unset($includedExport);
-        return $test;
+        return $unit;
     }
 
 }

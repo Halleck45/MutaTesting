@@ -27,8 +27,9 @@ class MutationFactoryTest extends \PHPUnit_Framework_TestCase
 
 
         $code = '<?php echo ok;';
+        $file = '/tmp/src1.php';
         $factory = new \Hal\MutaTesting\Mutation\Factory\MutationFactory($mutaterFactory);
-        $instance = $factory->factory($code);
+        $instance = $factory->factory($code, $file);
         $this->assertInstanceOf('\Hal\MutaTesting\Mutation\MutationInterface', $instance);
         $this->assertInstanceOf('\Hal\MutaTesting\Mutation\MutationCollectionInterface', $instance->getMutations());
     }

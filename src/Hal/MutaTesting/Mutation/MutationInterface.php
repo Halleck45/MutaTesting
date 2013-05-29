@@ -3,17 +3,14 @@
 namespace Hal\MutaTesting\Mutation;
 
 use Hal\MutaTesting\Test\UnitInterface;
+use Hal\MutaTesting\Token\TokenCollectionInterface;
 
 interface MutationInterface
 {
 
     public function getTokens();
 
-    public function getToken($index);
-
-    public function replaceToken($index, $token);
-
-    public function setTokens(array $tokens);
+    public function setTokens(TokenCollectionInterface $tokens);
 
     public function addMutation(MutationInterface $mutation);
 
@@ -22,4 +19,8 @@ interface MutationInterface
     public function getUnit();
 
     public function setUnit(UnitInterface $unit);
+
+    public function getFile();
+
+    public function setFile($file);
 }

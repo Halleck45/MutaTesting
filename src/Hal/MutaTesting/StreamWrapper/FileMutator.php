@@ -8,7 +8,7 @@ class FileMutator
     private static $FILES_TO_MUTATE = array();
     private $hwnd;
 
-    public static function init()
+    public static function initialize()
     {
         if (in_array("file", stream_get_wrappers())) {
             stream_wrapper_unregister("file");
@@ -16,17 +16,16 @@ class FileMutator
         stream_wrapper_register("file", __CLASS__);
     }
 
-    public static function addMutatedFile($file)
+    public static function addMutatedFile($originalFile, $mockedFile)
     {
-        array_push(self::$FILES_TO_MUTATE, $file);
+        self::$FILES_TO_MUTATE[$originalFile] = $mockedFile;
     }
 
     public function stream_open($path, $mode, $options, &$opened_path)
     {
         // avoid to load files listed in "self::$FILES_TO_MUTATE"
         if (in_array($path, self::$FILES_TO_MUTATE)) {
-            $this->hwnd = fopen('php://memory', 'r');
-            return true;
+            $path = self::$FILES_TO_MUTATE[$path];
         }
 
         stream_wrapper_restore('file');
@@ -79,7 +78,7 @@ class FileMutator
             mkdir($path, $mode, $recursive);
         }
         stream_wrapper_unregister("file");
-        stream_wrapper_register("file", "MutatorStream");
+        stream_wrapper_register("file", get_class($this));
         return true;
     }
 

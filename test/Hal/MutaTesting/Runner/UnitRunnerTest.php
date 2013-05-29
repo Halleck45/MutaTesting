@@ -16,21 +16,19 @@ class UnitRunnerTest extends \PHPUnit_Framework_TestCase
                 ->method('run')
         ;
 
-        $tests = array();
-
         $runner = new UnitRunner($adapter);
-        $runner->run($tests);
+        $runner->run(null);
     }
 
     public function testICanGetTestsSuite()
     {
         $adapter = $this->getMock('\Hal\MutaTesting\Runner\Adapter\AdapterInterface');
         $adapter->expects($this->once())
-                ->method('getTestSuites')
+                ->method('getSuiteResult')
         ;
 
         $runner = new UnitRunner($adapter);
-        $runner->getTestSuites();
+        $runner->getSuiteResult(null);
     }
 
     public function testICanObtainTestedFilesFromTest()
@@ -38,11 +36,11 @@ class UnitRunnerTest extends \PHPUnit_Framework_TestCase
         $adapter = $this->getMock('\Hal\MutaTesting\Runner\Adapter\AdapterInterface');
         $test = $this->getMock('\Hal\MutaTesting\Test\UnitInterface');
         $adapter->expects($this->once())
-                ->method('analyzeTestedFiles')
+                ->method('parseTestedFiles')
         ;
 
         $runner = new UnitRunner($adapter);
-        $runner->analyzeTestedFiles($test);
+        $runner->parseTestedFiles($test);
     }
 
 }

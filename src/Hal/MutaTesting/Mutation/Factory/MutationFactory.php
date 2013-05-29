@@ -2,21 +2,28 @@
 
 namespace Hal\MutaTesting\Mutation\Factory;
 
+use Hal\MutaTesting\Mutater\Factory\MutaterFactoryInterface;
+use Hal\MutaTesting\Mutation\Mutation;
+use Hal\MutaTesting\Test\UnitInterface;
+use Hal\MutaTesting\Token\TokenCollection;
+
 class MutationFactory
 {
 
     private $mutaterFactory;
 
-    public function __construct(\Hal\MutaTesting\Mutater\Factory\MutaterFactoryInterface $mutaterFactory)
+    public function __construct(MutaterFactoryInterface $mutaterFactory = null)
     {
         $this->mutaterFactory = $mutaterFactory;
     }
 
-    public function factory($code)
+    public function factory($code, $fileOrigin)
     {
 
-        $mutation = new \Hal\MutaTesting\Mutation\Mutation;
-        $mutation->setTokens(token_get_all($code));
+        $mutation = new Mutation;
+        $mutation
+                ->setTokens(new TokenCollection(token_get_all($code)))
+                ->setFile($fileOrigin);
 
 
         $tokens = token_get_all($code);
@@ -28,6 +35,16 @@ class MutationFactory
         }
 
 
+        return $mutation;
+    }
+
+    public function factoryFromUnit(UnitInterface $unit)
+    {
+        $mutation = new Mutation;
+        $mutation
+                ->setFile($unit->getFile())
+                ->setTokens(new TokenCollection(token_get_all(file_get_contents($unit->getFile()))))
+                ->setUnit($unit);
         return $mutation;
     }
 

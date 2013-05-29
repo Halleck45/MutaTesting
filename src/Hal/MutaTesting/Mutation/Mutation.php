@@ -3,38 +3,29 @@
 namespace Hal\MutaTesting\Mutation;
 
 use Hal\MutaTesting\Test\UnitInterface;
-use SplObjectStorage;
+use Hal\MutaTesting\Token\TokenCollectionInterface;
 
 class Mutation implements MutationInterface
 {
 
-    private $originalTokens;
+    private $tokens;
     private $mutations;
     private $unit;
+    private $file;
 
     public function __construct()
     {
         $this->mutations = new MutationCollection();
     }
 
-    public function getToken($index)
-    {
-        return isset($this->originalTokens[$index]) ? $this->originalTokens[$index] : null;
-    }
-
     public function getTokens()
     {
-        return $this->originalTokens;
-    }
-    
-    public function replaceToken($index, $token) {
-        $this->originalTokens[$index] = $token;
-        return $this;
+        return $this->tokens;
     }
 
-    public function setTokens(array $originalCode)
+    public function setTokens(TokenCollectionInterface $originalCode)
     {
-        $this->originalTokens = $originalCode;
+        $this->tokens = $originalCode;
         return $this;
     }
 
@@ -54,9 +45,20 @@ class Mutation implements MutationInterface
         return $this->unit;
     }
 
-    public function setUnit(UnitInterface $unit)
+    public function setUnit(UnitInterface $unit = null)
     {
         $this->unit = $unit;
+        return $this;
+    }
+
+    public function getFile()
+    {
+        return $this->file;
+    }
+
+    public function setFile($file)
+    {
+        $this->file = $file;
         return $this;
     }
 

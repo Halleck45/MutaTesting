@@ -28,4 +28,14 @@ class UnitCollection implements UnitCollectionInterface
         return $this->datas;
     }
 
+    public function getByFile($file)
+    {
+        foreach ($this->datas as $unit) {
+            if ($unit->getFile() == $file) {
+                return $unit;
+            }
+        }
+        return null;
+    }
+
 }

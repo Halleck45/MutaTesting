@@ -14,19 +14,19 @@ class UnitRunner
         $this->adapter = $adapter;
     }
 
-    public function run($path = null, array $options = array())
+    public function run($path = null, array $options = array(), $logFile = null, $prependFile = null)
     {
         return $this->adapter->run($path, $options);
     }
 
-    public function getTestSuites()
+    public function getSuiteResult($logFile)
     {
-        return $this->adapter->getTestSuites();
+        return $this->adapter->getSuiteResult($logFile);
     }
 
-    public function analyzeTestedFiles(UnitInterface $test)
+    public function parseTestedFiles(UnitInterface &$unit)
     {
-        return $this->adapter->analyzeTestedFiles($test);
+        return $this->adapter->parseTestedFiles($unit);
     }
 
 }
