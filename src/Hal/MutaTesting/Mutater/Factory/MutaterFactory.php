@@ -10,6 +10,12 @@ class MutaterFactory implements MutaterFactoryInterface
         , '*' => 'T_MATH_MUL'
         , '+' => 'T_MATH_ADD'
         , '-' => 'T_MATH_SUB'
+        , '>' => 'T_MATH_GREATER'
+        , '>=' => 'T_MATH_GREATEROREQUAL'
+        , '<' => 'T_MATH_LESS'
+        , '<=' => 'T_MATH_LESSOREQUAL'
+        , 'true' => 'T_BOOLEAN_TRUE'
+        , 'false' => 'T_BOOLEAN_FALSE'
     );
 
     public function isMutable($token)
@@ -51,7 +57,11 @@ class MutaterFactory implements MutaterFactoryInterface
                 $classname = token_name($type);
                 break;
         }
-        $classname = str_replace('_', '', $classname);
+
+        // camelcase
+        $classname = strtolower($classname);
+        $classname = preg_replace('/_(.?)/e', "strtoupper('$1')", $classname);
+        $classname = preg_replace('!(^t)!', '', $classname);
         if (null !== $classname) {
             $classname = '\Hal\MutaTesting\Mutater\Mutater' . $classname;
         }

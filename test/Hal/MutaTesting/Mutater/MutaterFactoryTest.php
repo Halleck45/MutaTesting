@@ -2,6 +2,8 @@
 
 namespace Test\Hal\MutaTesting\Mutater;
 
+require_once __DIR__ . '/../../../../vendor/autoload.php';
+
 /**
  * @group mutater
  */
@@ -16,7 +18,7 @@ class MutaterFactoryTest extends \PHPUnit_Framework_TestCase
         $instance = $factory->factory($token);
 
         $this->assertInstanceOf('\Hal\MutaTesting\Mutater\MutaterInterface', $instance);
-        $this->assertInstanceOf('\Hal\MutaTesting\Mutater\MutaterTISEQUAL', $instance);
+        $this->assertInstanceOf('\Hal\MutaTesting\Mutater\MutaterIsEqual', $instance);
     }
 
     public function testICanObtainTheNameOfMutaterFromToken()
@@ -25,7 +27,7 @@ class MutaterFactoryTest extends \PHPUnit_Framework_TestCase
         $factory = new \Hal\MutaTesting\Mutater\Factory\MutaterFactory;
         $classname = $factory->getClassnameForToken($token);
 
-        $this->assertEquals('\Hal\MutaTesting\Mutater\MutaterTISEQUAL', $classname);
+        $this->assertEquals('\Hal\MutaTesting\Mutater\MutaterIsEqual', $classname);
     }
 
 }

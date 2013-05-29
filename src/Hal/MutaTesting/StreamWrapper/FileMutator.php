@@ -54,15 +54,45 @@ class FileMutator
     {
         return fstat($this->hwnd);
     }
+    
+    public function rmdir($path, $options) {
+        stream_wrapper_restore('file');
+        $r = rmdir($path);
+        stream_wrapper_unregister("file");
+        stream_wrapper_register("file", get_class($this));
+        return $r;
+    }
+    
+    public function unlink($path) {
+        stream_wrapper_restore('file');
+        $r = unlink($path);
+        stream_wrapper_unregister("file");
+        stream_wrapper_register("file", get_class($this));
+        return $r;
+    }
 
-    public function url_stat()
+    public function url_stat($path)
     {
-//        return fstat($this->hwnd);
+        stream_wrapper_restore('file');
+        $r = false;
+        if (file_exists($path)) {
+            $hwnd = fopen($path, 'r');
+            if ($hwnd) {
+                $r = fstat($hwnd);
+            }
+        }
+        stream_wrapper_unregister("file");
+        stream_wrapper_register("file", get_class($this));
+        return $r;
     }
 
     public function dir_opendir($path, $options)
     {
+        stream_wrapper_restore('file');
         $this->hwnd = opendir($path);
+        stream_wrapper_unregister("file");
+        stream_wrapper_register("file", get_class($this));
+
         return true;
     }
 

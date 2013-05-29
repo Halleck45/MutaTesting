@@ -20,7 +20,11 @@ interface MutationInterface
 
     public function setUnit(UnitInterface $unit);
 
-    public function getFile();
+    public function getSourceFile();
 
-    public function setFile($file);
+    public function setSourceFile($file);
+
+    public function getTestFile();
+
+    public function setTestFile($file);
 }

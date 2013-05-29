@@ -11,7 +11,8 @@ class Mutation implements MutationInterface
     private $tokens;
     private $mutations;
     private $unit;
-    private $file;
+    private $sourceFile;
+    private $testFile;
 
     public function __construct()
     {
@@ -51,14 +52,25 @@ class Mutation implements MutationInterface
         return $this;
     }
 
-    public function getFile()
+    public function getSourceFile()
     {
-        return $this->file;
+        return $this->sourceFile;
     }
 
-    public function setFile($file)
+    public function setSourceFile($file)
     {
-        $this->file = $file;
+        $this->sourceFile = $file;
+        return $this;
+    }
+
+    public function getTestFile()
+    {
+        return $this->testFile;
+    }
+
+    public function setTestFile($testFile)
+    {
+        $this->testFile = $testFile;
         return $this;
     }
 

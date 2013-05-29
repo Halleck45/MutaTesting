@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
 
-require_once __DIR__ . '/vendor/autoload.php';
+$dispatcher = new Symfony\Component\EventDispatcher\EventDispatcher();
 $app = new Hal\MutaTesting\Console\MutaTestingApplication();
+$app->setDispatcher($dispatcher);
 $app->run();

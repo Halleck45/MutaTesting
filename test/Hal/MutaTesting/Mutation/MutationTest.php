@@ -1,7 +1,7 @@
 <?php
 
 namespace Test\Hal\MutaTesting\Mutation;
-
+require_once __DIR__ . '/../../../../vendor/autoload.php';
 /**
  * @group mutation
  */

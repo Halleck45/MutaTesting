@@ -28,6 +28,33 @@ class UnitCollection implements UnitCollectionInterface
         return $this->datas;
     }
 
+    public function getNumOfFailures()
+    {
+        $n = 0;
+        foreach ($this->datas as $unit) {
+            $n += $unit->getNumOfFailures();
+        }
+        return $n;
+    }
+
+    public function getNumOfErrors()
+    {
+        $n = 0;
+        foreach ($this->datas as $unit) {
+            $n += $unit->getNumOfErrors();
+        }
+        return $n;
+    }
+
+    public function getNumOfAssertions()
+    {
+        $n = 0;
+        foreach ($this->datas as $unit) {
+            $n += $unit->getNumOfAssertions();
+        }
+        return $n;
+    }
+
     public function getByFile($file)
     {
         foreach ($this->datas as $unit) {

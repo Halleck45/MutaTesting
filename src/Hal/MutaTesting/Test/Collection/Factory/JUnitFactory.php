@@ -16,7 +16,12 @@ class JUnitFactory
             throw new \UnexpectedValueException('Invalid xml given');
         }
 
-        foreach ($xml->xpath('//testsuite/testsuite') as $info) {
+        $nodes = $xml->xpath('//testsuite/testsuite');
+        if (!$nodes) {
+            $nodes = $xml->xpath('//testsuites/testsuite');
+        }
+
+        foreach ($nodes as $info) {
             $unit = new \Hal\MutaTesting\Test\Unit;
             $unit
                     ->setName((string) $info['name'])

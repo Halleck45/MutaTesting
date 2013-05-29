@@ -4,7 +4,7 @@ namespace Hal\MutaTesting\Mutater;
 
 use Hal\MutaTesting\Mutation\MutationInterface;
 
-class MutaterTISEQUAL implements MutaterInterface
+class MutaterIsEqual implements MutaterInterface
 {
 
     public function mutate(MutationInterface $original, $index)
@@ -21,7 +21,9 @@ class MutaterTISEQUAL implements MutaterInterface
         $new = new \Hal\MutaTesting\Mutation\Mutation;
         $new
                 ->setTokens($original->getTokens()->replace($index, $newToken))
-                ->setUnit($original->getUnit());
+                ->setUnit($original->getUnit())
+                ->setSourceFile($original->getSourceFile())
+                ->setTestFile($original->getTestFile());
         
         return $new;
     }

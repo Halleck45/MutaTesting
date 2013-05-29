@@ -1,5 +1,5 @@
 {
-    "name": "MutaTesing",
+    "name": "halleck45/mutaTesing",
     "description": "mutation testing tool for PHP",
     "keywords": ["test", "unit", "mutating testing"],
     "type": "library",
@@ -15,8 +15,9 @@
         "php": ">=5.3",
         "symfony/console": "~2.0",
         "symfony/config": "~2.0",
-        "symfony/dependency-injection": "~2.0",
-        "symfony/finder": "~2.0"
+        "symfony/process": "~2.0",
+        "symfony/event-dispatcher": "~2.0",
+        "sebastian/diff": "1.0.*@dev"
     },
     "autoload": {
         "psr-0": {

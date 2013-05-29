@@ -1,11 +1,11 @@
 <?php
 
 namespace Test\Hal\MutaTesting\Mutater;
-
+require_once __DIR__ . '/../../../../vendor/autoload.php';
 /**
  * @group mutater
  */
-class MutaterTISEQUALTest extends \PHPUnit_Framework_TestCase
+class MutaterIsEqualTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testICanMutateEquality()
@@ -18,7 +18,7 @@ class MutaterTISEQUALTest extends \PHPUnit_Framework_TestCase
         
         
 
-        $mutater = new \Hal\MutaTesting\Mutater\MutaterTISEQUAL;
+        $mutater = new \Hal\MutaTesting\Mutater\MutaterIsEqual;
 
         $result = $mutater->mutate($mutation, 0);
         $this->assertInstanceOf('\Hal\MutaTesting\Mutation\MutationInterface', $result);

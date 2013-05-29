@@ -26,7 +26,7 @@ interface AdapterInterface
      * @param MutationInterface $mutation
      * @return UnitInterface
      */
-    public function runMutation(MutationInterface $mutation, $options = array(), $logFile = null, $prependFile = null);
+    public function runMutation(MutationInterface &$mutation, $options = array(), $logFile = null, $prependFile = null);
 
     /**
      * Run tests
@@ -37,7 +37,7 @@ interface AdapterInterface
      * @param string $prependFile
      * @return string $output
      */
-    public function run($path = null, array $options = array(), $logFile = null, $prependFile = null);
+    public function run($path = null, array $options = array(), $logFile = null, $prependFile = null, callable $callback = null);
 
     /**
      * Run specific tests

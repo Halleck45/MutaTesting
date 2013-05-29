@@ -1,11 +1,11 @@
 <?php
 
 namespace Test\Hal\MutaTesting\Mutater;
-
+require_once __DIR__ . '/../../../../vendor/autoload.php';
 /**
  * @group mutater
  */
-class MutaterTISNOTEQUALTest extends \PHPUnit_Framework_TestCase
+class MutaterIsNotEqualTest extends \PHPUnit_Framework_TestCase
 {
 
     public function testICanMutateEquality()
@@ -16,7 +16,7 @@ class MutaterTISNOTEQUALTest extends \PHPUnit_Framework_TestCase
                 ->method('getTokens')
                 ->will($this->returnValue($token));
 
-        $mutater = new \Hal\MutaTesting\Mutater\MutaterTISNOTEQUAL;
+        $mutater = new \Hal\MutaTesting\Mutater\MutaterIsNotEqual();
 
         $result = $mutater->mutate($mutation, 0);
         $this->assertInstanceOf('\Hal\MutaTesting\Mutation\MutationInterface', $result);

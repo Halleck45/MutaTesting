@@ -35,8 +35,9 @@ class TokenCollection implements TokenCollectionInterface
 
     public function replace($index, $token)
     {
-        $this->tokens[$index] = $token;
-        return $this;
+        $tokens = $this->tokens;
+        $tokens[$index] = $token;
+        return new TokenCollection($tokens);
     }
 
     public function get($index)

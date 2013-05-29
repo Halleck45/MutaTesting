@@ -17,20 +17,22 @@ class MutationFactory
         $this->mutaterFactory = $mutaterFactory;
     }
 
-    public function factory($code, $fileOrigin)
+    public function factory($code, $fileOrigin, $testFile)
     {
 
         $mutation = new Mutation;
         $mutation
                 ->setTokens(new TokenCollection(token_get_all($code)))
-                ->setFile($fileOrigin);
+                ->setSourceFile($fileOrigin)
+                ->setTestFile($testFile);
 
 
         $tokens = token_get_all($code);
         foreach ($tokens as $index => $token) {
             if ($this->mutaterFactory->isMutable($token)) {
                 $mutater = $this->mutaterFactory->factory($token);
-                $mutation->addMutation($mutater->mutate($mutation, $index));
+                $mutated = $mutater->mutate($mutation, $index);
+                $mutation->addMutation($mutated);
             }
         }
 
@@ -42,8 +44,9 @@ class MutationFactory
     {
         $mutation = new Mutation;
         $mutation
-                ->setFile($unit->getFile())
-                ->setTokens(new TokenCollection(token_get_all(file_get_contents($unit->getFile()))))
+                ->setTestFile($unit->getFile())
+//                ->setTokens(new TokenCollection(token_get_all(file_get_contents($unit->getTestFile()))))
+                ->setTokens(new TokenCollection(array()))
                 ->setUnit($unit);
         return $mutation;
     }

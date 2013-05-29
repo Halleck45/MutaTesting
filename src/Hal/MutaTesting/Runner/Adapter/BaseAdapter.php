@@ -3,9 +3,12 @@
 namespace Hal\MutaTesting\Runner\Adapter;
 
 use Hal\MutaTesting\Mutation\MutationInterface;
+use Hal\MutaTesting\Runner\Process\ProcessManagerInterface;
 use Hal\MutaTesting\Test\Collection\Factory\JUnitFactory;
 use Hal\MutaTesting\Test\UnitCollectionInterface;
 use Hal\MutaTesting\Test\UnitInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Process\Process;
 
 class BaseAdapter implements AdapterInterface
 {
@@ -13,11 +16,14 @@ class BaseAdapter implements AdapterInterface
     protected $binary;
     protected $options;
     protected $testDirectory;
+    protected $lastCommand;
+    protected $processManager;
 
-    public function __construct($binary, $testDirectory, array $options = array())
+    public function __construct($binary, $testDirectory, array $options = array(), ProcessManagerInterface $processManager = null)
     {
         $this->binary = $binary;
         $this->options = $options;
+        $this->processManager = $processManager;
         $this->testDirectory = $testDirectory;
     }
 
@@ -40,9 +46,9 @@ class BaseAdapter implements AdapterInterface
                 . file_get_contents(__DIR__ . '/../../StreamWrapper/FileMutator.php')
                 . "\n \Hal\MutaTesting\StreamWrapper\FileMutator::initialize();"
                 . sprintf("\n \Hal\MutaTesting\StreamWrapper\FileMutator::addMutatedFile('%s', '%s'); ?>"
-                        , $mutation->getFile(), $temporaryFile);
+                        , $mutation->getSourceFile(), $temporaryFile);
 
-        $bootstrapFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'bootstrap-' . md5($mutation->getFile()) . '.php';
+        $bootstrapFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'bootstrap-' . md5($mutation->getTestFile()) . '.php';
         file_put_contents($bootstrapFile, $bootstrapContent);
 
         return $bootstrapFile;
@@ -54,7 +60,7 @@ class BaseAdapter implements AdapterInterface
      * @param MutationInterface $mutation
      * @return UnitInterface
      */
-    public function runMutation(MutationInterface $mutation, $options = array(), $logFile = null, $prependFile = null)
+    public function runMutation(MutationInterface &$mutation, $options = array(), $logFile = null, $prependFile = null, callable $callback = null)
     {
         if (is_null($prependFile)) {
             $prependFile = $this->createFileSystemMock($mutation);
@@ -62,10 +68,18 @@ class BaseAdapter implements AdapterInterface
         if (is_null($logFile)) {
             $logFile = tempnam(sys_get_temp_dir(), 'mutate-junit');
         }
-        $this->run($mutation->getFile(), array(), $logFile, $prependFile);
 
-        $results = $this->getSuiteResult($logFile);
-        return $results->getByFile($mutation->getFile());
+        $self = $this;
+        $cb = function() use($mutation, $callback, $logFile, $self) {
+                    $results = $self->getSuiteResult($logFile);
+                    $result = $results->getByFile($mutation->getTestFile());
+                    $mutation->setUnit($result);
+                    if (is_callable($callback)) {
+                        $callback($result);
+                    }
+                };
+
+        $this->run($mutation->getTestFile(), array(), $logFile, $prependFile, $cb);
     }
 
     /**
@@ -77,7 +91,7 @@ class BaseAdapter implements AdapterInterface
      * @param string $prependFile
      * @return string $output
      */
-    public function run($path = null, array $options = array(), $logFile = null, $prependFile = null)
+    public function run($path = null, array $options = array(), $logFile = null, $prependFile = null, callable $callback = null)
     {
         if (is_null($path)) {
             $path = $this->getTestDirectory();
@@ -90,8 +104,20 @@ class BaseAdapter implements AdapterInterface
         foreach ($options as $option) {
             $args .= ' ' . $option;
         }
-        $output = shell_exec("$binary $args $path");
-        return $output;
+        $this->lastCommand = "$binary $args $path";
+
+        if ($this->processManager && is_callable($callback)) {
+            $process = new Process($this->lastCommand);
+            $this->processManager->push($process, $callback);
+            return null;
+        } else {
+
+            $process = new Process($this->lastCommand);
+            $process->start();
+            while ($process->isRunning()) {
+            };
+            return $process->getOutput();
+        }
     }
 
     /**
@@ -107,7 +133,7 @@ class BaseAdapter implements AdapterInterface
     {
         $path = '';
         foreach ($collection->all() as $unit) {
-            $path.= ' ' . $unit->GetFile();
+            $path.= ' ' . $unit->GetTestFile();
         }
         $this->run($path, $options, $logFile, $prependFile);
     }
@@ -158,6 +184,17 @@ class BaseAdapter implements AdapterInterface
     public function getTestDirectory()
     {
         return $this->testDirectory;
+    }
+
+    public function getLastCommand()
+    {
+        return $this->lastCommand;
+    }
+
+    public function setProcessManager(ProcessManagerInterface $processManager)
+    {
+        $this->processManager = $processManager;
+        return $this;
     }
 
 }
