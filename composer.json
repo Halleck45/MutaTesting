@@ -19,9 +19,6 @@
         "symfony/event-dispatcher": "~2.0",
         "sebastian/diff": "1.0.*@dev"
     },
-    "require-dev": {
-        "phpunit/phpunit": "3.8.*"
-    },
     "autoload": {
         "psr-0": {
             "Hal\\MutaTesting": "src/"
