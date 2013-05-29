@@ -2,6 +2,9 @@
 
 Mutation testing tool for PHP.
 
+[![Build Status](https://secure.travis-ci.org/Halleck45/MutaTesting.png)](http://travis-ci.org/Halleck45/MutaTesting)
+
+
 According to [Wikipedia](http://en.wikipedia.org/wiki/Mutation_testing):
 
 > Mutation testing (or Mutation analysis or Program mutation) evaluates the 
@@ -21,9 +24,10 @@ Edit your `composer.json`:
 
 And run Composer:
 
-    php composer.phar update halleck45/mutaTesing
-
+```bash
+php composer.phar update halleck45/mutaTesing
 ```
+
 ## Usage
 
 ```bash
