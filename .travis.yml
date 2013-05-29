@@ -6,4 +6,4 @@ before_script:
   - wget http://getcomposer.org/composer.phar
   - wget http://pear.phpunit.de/get/phpunit.phar && chmod +x phpunit.phar
   - php composer.phar install 
-script: phpunit.phar
+script: ./phpunit.phar
