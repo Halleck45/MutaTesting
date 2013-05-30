@@ -105,7 +105,6 @@ class BaseAdapter implements AdapterInterface
             $args .= ' ' . $option;
         }
         $this->lastCommand = "$binary $args $path";
-
         if ($this->processManager && is_callable($callback)) {
             $process = new Process($this->lastCommand);
             $this->processManager->push($process, $callback);

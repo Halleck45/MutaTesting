@@ -86,7 +86,7 @@ class RunMutatingCommand extends Command
             $adapter->parseTestedFiles($unit);
             $this->getApplication()->getDispatcher()->dispatch('mutate.parseTestedFiles', new ParseTestedFilesEvent($unit));
         }
-        $this->getApplication()->getDispatcher()->dispatch('mutate.parseTestedFilesFinished', new UnitsResultEvent($units));
+        $this->getApplication()->getDispatcher()->dispatch('mutate.parseTestedFilesDone', new UnitsResultEvent($units));
 
 
         // mutation

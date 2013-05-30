@@ -15,6 +15,7 @@ class TextSubscriber implements EventSubscriberInterface
 
     private $input;
     private $output;
+    private $cursor = 80;
 
     public function __construct(InputInterface $input, OutputInterface $output)
     {
@@ -27,7 +28,7 @@ class TextSubscriber implements EventSubscriberInterface
         return array(
             'mutate.firstrun' => array('onFirstRun', 0)
             , 'mutate.parseTestedFiles' => array('onParseTestedFiles', 0)
-            , 'mutate.parseTestedFilesFinished' => array('onParseTestedFilesEnd', 0)
+            , 'mutate.parseTestedFilesDone' => array('onParseTestedFilesEnd', 0)
             , 'mutate.mutation' => array('onMutation', 0)
             , 'mutate.mutationsDone' => array('onMutationsDone', 0)
         );
@@ -52,8 +53,10 @@ class TextSubscriber implements EventSubscriberInterface
 
     public function onParseTestedFiles(ParseTestedFilesEvent $event)
     {
-        $this->output->write('.');
+        $this->progress('.');
     }
+    
+    
 
     public function onParseTestedFilesEnd(UnitsResultEvent $event)
     {
@@ -67,14 +70,15 @@ class TextSubscriber implements EventSubscriberInterface
 
     public function onMutation(MutationEvent $event)
     {
+        
         if(!$event->getUnit()) {
-            $this->output->write('<error>E</error>');
+            $this->progress('<error>E</error>');
             return;
         }
         if ($event->getUnit()->getNumOfFailures() == 0 && $event->getUnit()->getNumOfErrors() == 0) {
-            $this->output->write('L');
+            $this->progress('L');
         } else {
-            $this->output->write('.');
+            $this->progress('.');
         }
     }
 
@@ -109,4 +113,12 @@ class TextSubscriber implements EventSubscriberInterface
         }
     }
 
+    public function progress($char) {
+        $this->cursor++;
+        if($this->cursor > 80) {
+            $this->cursor = 0;
+            $this->output->write(PHP_EOL);
+        }
+        $this->output->write($char);
+    }
 }
