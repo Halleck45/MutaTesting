@@ -43,7 +43,10 @@ class RunMutatingCommand extends Command
                         'processes', null, InputOption::VALUE_REQUIRED, 'number maximum of parallelized tests', 10
                 )
                 ->addOption(
-                        'format', 'f', InputOption::VALUE_REQUIRED, 'Format (text)', 'text'
+                        'format', 'f', InputOption::VALUE_REQUIRED, 'Format (text|html)', 'text'
+                )
+                ->addOption(
+                        'out', 'o', InputOption::VALUE_REQUIRED, 'Destination directory for html file', null
                 )
         ;
     }
