@@ -2,11 +2,12 @@
 
 namespace Hal\MutaTesting\Command;
 
+use Exception;
 use Hal\MutaTesting\Event\FirstRunEvent;
 use Hal\MutaTesting\Event\MutationEvent;
 use Hal\MutaTesting\Event\MutationsDoneEvent;
 use Hal\MutaTesting\Event\ParseTestedFilesEvent;
-use Hal\MutaTesting\Event\Subscriber\Format\TextSubscriber;
+use Hal\MutaTesting\Event\Subscriber\Format\ConsoleSubscriber;
 use Hal\MutaTesting\Event\UnitsResultEvent;
 use Hal\MutaTesting\Mutater\Factory\MutaterFactory;
 use Hal\MutaTesting\Mutation\Factory\MutationFactory;
@@ -39,7 +40,7 @@ class RunMutatingCommand extends Command
                         'options', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Default options used as argument to run your tests'
                 )
                 ->addOption(
-                        'processes', null, InputOption::VALUE_REQUIRED , 'number maximum of parallelized tests', 10
+                        'processes', null, InputOption::VALUE_REQUIRED, 'number maximum of parallelized tests', 10
                 )
                 ->addOption(
                         'format', 'f', InputOption::VALUE_REQUIRED, 'Format (text)', 'text'
@@ -49,8 +50,17 @@ class RunMutatingCommand extends Command
 
     protected function prepare(InputInterface $input, OutputInterface $output)
     {
-        $this->getApplication()->getDispatcher()
-                ->addSubscriber(new TextSubscriber($input, $output));
+        // formaters
+        $dispatcher = $this->getApplication()->getDispatcher();
+        $dispatcher->addSubscriber(new ConsoleSubscriber($input, $output));
+        $formaters = explode(',', $input->getOption('format'));
+        foreach ($formaters as $format) {
+            $class = sprintf('\Hal\MutaTesting\Event\Subscriber\Format\%sSubscriber' ,ucfirst(strtolower($format)));
+            if (!class_exists($class)) {
+                throw new Exception(sprintf('invalid formater "%s" given', $format));
+            }
+            $dispatcher->addSubscriber(new $class($input, $output));
+        }
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -58,7 +68,7 @@ class RunMutatingCommand extends Command
         // version, author
         $output->writeln('mutation testing tool for PHP, by Jean-François Lépine');
         $output->writeln('');
-        
+
         // get adapter
         $this->prepare($input, $output);
         $factory = new AdapterFactory();
@@ -100,9 +110,9 @@ class RunMutatingCommand extends Command
         $adapter->setProcessManager($processManager);
         foreach ($units->all() as $unit) {
             foreach ($unit->getTestedFiles() as $filename) {
-                
+
                 $mainMutation = $mutationFactory->factory(file_get_contents($filename), $filename, $unit->getFile());
-                
+
                 foreach ($mainMutation->getMutations() as $mutation) {
 
                     // processes
