@@ -42,6 +42,13 @@ Example:
 
 ### Advanced usage
 
+To have a html report file, tou need to use the ̀ --format` option. 
+Remember to give also a `--out` option for the destination directory.
+
+```bash
+./bin/mutatesting phpunit phpunit.phar  myTestFolder --format=html --out=./logFolder
+```
+
 If your tests need options, you can pass them with `--options`
 
 ```bash
