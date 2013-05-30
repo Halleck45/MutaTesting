@@ -40,9 +40,23 @@ class TokenCollection implements TokenCollectionInterface
         return new TokenCollection($tokens);
     }
 
-    public function get($index)
+    public function remove($index, $end = null)
+    {
+        $tokens = $this->tokens;
+        if (null === $end) {
+            $end = $index;
+        }
+        for ($i = $index; $i <= $end; $i++) {
+            unset($tokens[$i]);
+        }
+        return new TokenCollection($tokens);
+    }
+
+    public
+            function get($index)
     {
         return isset($this->tokens[$index]) ? $this->tokens[$index] : null;
     }
 
 }
+

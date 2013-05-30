@@ -29,7 +29,6 @@ class MutaterFactory implements MutaterFactoryInterface
         if (!$this->isMutable($token)) {
             return null;
         }
-
         $classname = $this->getClassnameForToken($token);
         return new $classname;
     }

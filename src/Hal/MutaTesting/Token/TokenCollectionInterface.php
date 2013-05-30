@@ -11,5 +11,7 @@ interface TokenCollectionInterface
 
     public function replace($index, $token);
 
+    public function remove($index, $end = null);
+
     public function get($index);
 }

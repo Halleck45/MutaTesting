@@ -42,16 +42,53 @@ class HtmlSubscriber implements EventSubscriberInterface
     {
 
         $html = '<html><head><title>MutaTesting</title>'
-                .'<style>
+                . '<style>
                     body { font-family: "Helvetica Neue",Helvetica,Arial,sans-serif; margin0; padding: 0; background-color:#EEE;}
                     .diff { border:1px solid #CCC; background-color:#FFF; width:800px; padding:5px; }
                     .infos { font-size:0.9em; paddin-left:30px; color:#333;}
                 </style>'
-                .'</head><body>%1$s';
+                . '</head><body>%content%';
 
         $found = 0;
         $nbMutants = 0;
         $diff = new \Hal\MutaTesting\Diff\DiffHtml();
+
+
+        // by file :
+        $byFile = array();
+        foreach ($event->getMutations() as $mutation) {
+            if (!isset($byFile[$mutation->getSourceFile()])) {
+                $byFile[$mutation->getSourceFile()] = (object) array('mutants' => 0, 'survived' => 0);
+            }
+
+            $muted = 0;
+            foreach ($mutation->getMutations() as $mutated) {
+                $muted++;
+                $unit = $mutated->getUnit();
+                if ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0) {
+                    $byFile[$mutation->getSourceFile()]->survived++;
+                }
+            }
+            
+            $byFile[$mutation->getSourceFile()]->mutants += $muted;
+        }
+
+        $html .= '<div class="by-file"><ul>';
+        foreach ($byFile as $file => $data) {
+            if ($data->survived > 0) {
+                $html .= sprintf('<li><span>[<span class="score">%4$s%%</span>:  %2$d survived on %3$d mutants]</span> %1$s</li>'
+                        , $file
+                        , $data->survived
+                        , $data->mutants
+                        , 100 - ceil($data->survived / $data->mutants * 100)
+                        );
+            }
+        }
+        $html.= '</ul></div>';
+
+
+
+        // details
         foreach ($event->getMutations() as $mutation) {
 
             $nbMutants += sizeof($mutation->getMutations());
@@ -72,7 +109,7 @@ class HtmlSubscriber implements EventSubscriberInterface
             }
         }
 
-        $html = sprintf($html, sprintf('<h1>%d mutants, %d survived</h1>', $nbMutants, $found));
+        $html = str_replace('%content%', sprintf('<h1>%d mutants, %d survived</h1>', $nbMutants, $found), $html);
 
         $filename = $this->directory . 'mutation.html';
         file_put_contents($filename, $html);
