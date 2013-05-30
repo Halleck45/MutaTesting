@@ -18,14 +18,14 @@ Edit your `composer.json`:
 
 ```json
 "require": {
-    "halleck45/mutaTesing" : "master"
+    "halleck45/mutaTesting" : "master"
 }
 ```
 
 And run Composer:
 
 ```bash
-php composer.phar update halleck45/mutaTesing
+php composer.phar update halleck45/mutaTesting
 ```
 
 ## Usage
