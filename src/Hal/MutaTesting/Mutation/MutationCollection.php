@@ -28,4 +28,22 @@ class MutationCollection implements MutationCollectionInterface
         return $this;
     }
 
+    public function getSurvivors()
+    {
+
+        $collection = new MutationCollection;
+        foreach ($this->mutations as $mutation) {
+            $unit = $mutation->getUnit();
+            if ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0) {
+                $collection->push($mutation);
+            }
+        }
+        return $collection;
+    }
+
+    public function count()
+    {
+        return sizeof($this->mutations);
+    }
+
 }

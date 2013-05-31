@@ -17,7 +17,8 @@
         "symfony/config": "~2.0",
         "symfony/process": "~2.0",
         "symfony/event-dispatcher": "~2.0",
-        "sebastian/diff": "1.0.*@dev"
+        "sebastian/diff": "1.0.*@dev",
+        "twig/twig": "1.13.*@dev"
     },
     "autoload": {
         "psr-0": {
