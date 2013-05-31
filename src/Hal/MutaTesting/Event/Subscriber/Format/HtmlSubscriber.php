@@ -41,76 +41,51 @@ class HtmlSubscriber implements EventSubscriberInterface
     public function onMutationsDone(\Hal\MutaTesting\Event\MutationsDoneEvent $event)
     {
 
-        $html = '<html><head><title>MutaTesting</title>'
-                . '<style>
-                    body { font-family: "Helvetica Neue",Helvetica,Arial,sans-serif; margin0; padding: 0; background-color:#EEE;}
-                    .diff { border:1px solid #CCC; background-color:#FFF; width:800px; padding:5px; }
-                    .infos { font-size:0.9em; paddin-left:30px; color:#333;}
-                </style>'
-                . '</head><body>%content%';
-
-        $found = 0;
-        $nbMutants = 0;
+        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../../../Resources/views/');
+        $twig = new \Twig_Environment($loader, array());
         $diff = new \Hal\MutaTesting\Diff\DiffHtml();
+        $serviceFile = new \Hal\MutaTesting\Mutation\Consolidation\SourceFileService(($event->getMutations()));
+        $serviceTotal = new \Hal\MutaTesting\Mutation\Consolidation\TotalService(($event->getMutations()));
 
+        // total
+        $total = (object) array(
+                    'score' => $serviceTotal->getScore()
+                    , 'scoreStep' => ceil($serviceTotal->getScore() / 25) * 25
+                    , 'survivors' => $serviceTotal->getSurvivors()->count()
+                    , 'mutants' => $serviceTotal->getMutants()->count()
+        );
 
-        // by file :
+        // by file
         $byFile = array();
+        $files = $serviceFile->getAvailableFiles();
+        foreach ($files as $file) {
+            $byFile[$file] = (object) array(
+                        'score' => $serviceFile->getScore($file)
+                        , 'scoreStep' => ceil($serviceFile->getScore($file) / 25) * 25
+                        , 'survivors' => $serviceFile->getSurvivors($file)->count()
+                        , 'mutants' => $serviceFile->getMutants($file)->count()
+                        , 'survivedMutations' => array()
+            );
+        }
+
+        // by file, with diff
         foreach ($event->getMutations() as $mutation) {
-            if (!isset($byFile[$mutation->getSourceFile()])) {
-                $byFile[$mutation->getSourceFile()] = (object) array('mutants' => 0, 'survived' => 0);
-            }
-
-            $muted = 0;
-            foreach ($mutation->getMutations() as $mutated) {
-                $muted++;
-                $unit = $mutated->getUnit();
-                if ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0) {
-                    $byFile[$mutation->getSourceFile()]->survived++;
-                }
-            }
-            
-            $byFile[$mutation->getSourceFile()]->mutants += $muted;
-        }
-
-        $html .= '<div class="by-file"><ul>';
-        foreach ($byFile as $file => $data) {
-            if ($data->survived > 0) {
-                $html .= sprintf('<li><span>[<span class="score">%4$s%%</span>:  %2$d survived on %3$d mutants]</span> %1$s</li>'
-                        , $file
-                        , $data->survived
-                        , $data->mutants
-                        , 100 - ceil($data->survived / $data->mutants * 100)
-                        );
-            }
-        }
-        $html.= '</ul></div>';
-
-
-
-        // details
-        foreach ($event->getMutations() as $mutation) {
-
-            $nbMutants += sizeof($mutation->getMutations());
-
-            foreach ($mutation->getMutations() as $mutated) {
-                $unit = $mutated->getUnit();
-                if ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0) {
-
-                    $html .= sprintf('<h2>%s</h2>', $mutation->getSourceFile())
-                            . sprintf('<p class="infos">tested with <span>%s</span>', $unit->getFile())
-                            . sprintf('<p class="infos">Duration: <span>%s</span>, Assertions: %s', $unit->getTime(), $unit->getNumOfAssertions())
-                            . sprintf('<div class="diff">%s</div>', $diff->diff($mutation->getTokens()->asPhp(), $mutated->getTokens()->asPhp()))
-                    ;
-
-
-                    $found++;
-                }
+            $src = $mutation->getSourceFile();
+            foreach ($mutation->getMutations()->getSurvivors()->all() as $survivor) {
+                $byFile[$src]->survivedMutations[] = (object) array(
+                            'mutant' => $survivor
+                            , 'diff' => $diff->diff($mutation->getTokens()->asPhp(), $survivor->getTokens()->asPhp())
+                );
             }
         }
 
-        $html = str_replace('%content%', sprintf('<h1>%d mutants, %d survived</h1>', $nbMutants, $found), $html);
+        // render html
+        $html = $twig->render('report.html.twig', array(
+            'files' => $byFile
+            , 'total' => $total
+        ));
 
+        // write file
         $filename = $this->directory . 'mutation.html';
         file_put_contents($filename, $html);
         $this->output->writeln(sprintf('<info>file "%s" created', $filename));

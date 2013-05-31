@@ -1,0 +1,93 @@
+<html>
+    <head>
+        <title>[{{total.score}}%] Mutation Testing</title>
+        <style>
+
+                body { 
+                    color: #333333;
+                    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+                    font-size: 14px;
+                    line-height: 20px;
+                    text-align:center;
+                }
+                a, a:visited {
+                    text-decoration:none;
+                    color:#0088CC;
+                }
+                a:hover {
+                    text-decoration:underline;
+                }
+                #page {
+                    margin:0 auto;
+                    width:996px;
+                    text-align:justify;
+                }
+
+                #general {
+                }
+                #general li {
+                    list-style: none;
+                }
+                .score {
+                    display:inline-block;
+                    width:50px;
+                    text-align:center;
+                }
+                .score0, .score0 a{ color: #DD0000; }
+                .score25, .score25 a{ color:#FF8000; }
+                .score50, .score50 a{ color: darkseagreen; }
+                .score75, .score75 a{ color: limegreen; }
+                .score100, .score100 a{ color: forestgreen; }
+                .score-details {
+                    font-size: 0.8em;
+                    display:inline-block;
+                    width:180px;
+                }
+
+                .diff { border:1px solid #CCC; background-color:#FFF; width:800px; padding:5px; }
+                .infos { font-size:0.9em; paddin-left:30px; color:#333;}    
+            </style>
+        </head>
+        <body>
+
+            <div id="page">
+                <div id="head">
+                    <h1>Score: <span class="score">{{total.score}}%</span></h1>
+                    <h2>( {{total.survivors}} survivors on {{total.mutants}} mutants )</h1>
+                </div>
+
+                <div id="general">
+                    <ul>
+                    {% for file,info in files  %}
+                            <li>
+                                <span class="score score{{info.scoreStep}}"><a href="#{{file}}">{{info.score}}%</a></span><span class="score-details">( {{info.survivors}} survivors / {{info.mutants}} mutants )</span>    
+                                <span class="score-filename"><a href="#{{file}}">{{ file }}</a></span>
+                            </li>
+                    {% endfor %}
+                        </ul>
+                    </div>
+
+
+
+
+                    <div id="detail">
+                    {% for file,info in files  %}
+                            <div id="{{file}}" class="box-mutant">
+                                <h3>{{file}}</h3>
+                                <div><span class="score score{{info.scoreStep}}">{{info.score}}%</span><span class="score-details">( {{info.survivors}} survivors / {{info.mutants}} mutants )</span>    </div>
+                            </div>
+
+                        {% for mutation in info.survivedMutations %}
+                            <div class="diff">
+                            {{mutation.diff|raw }}
+                                </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                            </div>
+                        </div>
+
+
+
+                    </body>
+                </html>

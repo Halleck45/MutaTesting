@@ -2,10 +2,9 @@
 
 namespace Hal\MutaTesting\Diff;
 
-class DiffHtml extends \SebastianBergmann\Diff
+class DiffHtml 
 {
 
-    private $header;
 
     /**
      * Returns the diff between two arrays or strings as string.
@@ -16,9 +15,10 @@ class DiffHtml extends \SebastianBergmann\Diff
      */
     public function diff($from, $to)
     {
-        $buffer = '';
+        $tool = new \SebastianBergmann\Diff('');
+        
 
-        $diff = $this->diffToArray($from, $to);
+        $diff = $tool->diffToArray($from, $to);
 
         $inOld = FALSE;
         $i = 0;

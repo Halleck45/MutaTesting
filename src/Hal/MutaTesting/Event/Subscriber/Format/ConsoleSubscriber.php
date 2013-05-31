@@ -82,29 +82,20 @@ class ConsoleSubscriber implements EventSubscriberInterface
 
     public function onMutationsDone(\Hal\MutaTesting\Event\MutationsDoneEvent $event)
     {
-        $found = 0;
-        $nbMutants = 0;
-        foreach ($event->getMutations() as $mutation) {
-
-            $nbMutants += sizeof($mutation->getMutations());
-
-            foreach ($mutation->getMutations() as $mutated) {
-                $unit = $mutated->getUnit();
-                if ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0) {
-                    $found++;
-                }
-            }
-        }
 
         $this->output->writeln('');
         $this->output->writeln('Result:');
-        $this->output->writeln(sprintf("\t%d mutants tested.", $nbMutants));
 
-        if ($found == 0) {
-            $this->output->writeln("\t<info>no mutant survived</info>");
+
+        // total
+        $service = new \Hal\MutaTesting\Mutation\Consolidation\TotalService(($event->getMutations()));
+        if (0 === $service->getSurvivors()->count()) {
+            $this->output->writeln(sprintf("\t<info>score: %s%%</info>", $service->getScore()));
         } else {
-            $this->output->writeln(sprintf("\t<error>%d mutants survived</error>", $found));
+            $this->output->writeln(sprintf("<error>\tscore: %s%%</error>", $service->getScore()));
         }
+        $this->output->writeln(sprintf("\t%d mutants.", $service->getMutants()->count()));
+        $this->output->writeln(sprintf("\t%d survivors.", $service->getSurvivors()->count()));
     }
 
     public function progress($char)

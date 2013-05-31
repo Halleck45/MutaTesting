@@ -43,7 +43,7 @@ class RunMutatingCommand extends Command
                         'processes', null, InputOption::VALUE_REQUIRED, 'number maximum of parallelized tests', 10
                 )
                 ->addOption(
-                        'format', 'f', InputOption::VALUE_REQUIRED, 'Format (text|html)', 'text'
+                        'format', 'f', InputOption::VALUE_REQUIRED, 'Format (text|html|console)', 'console'
                 )
                 ->addOption(
                         'out', 'o', InputOption::VALUE_REQUIRED, 'Destination directory for html file', null
@@ -55,10 +55,12 @@ class RunMutatingCommand extends Command
     {
         // formaters
         $dispatcher = $this->getApplication()->getDispatcher();
-        $dispatcher->addSubscriber(new ConsoleSubscriber($input, $output));
         $formaters = explode(',', $input->getOption('format'));
+        if (!in_array('console', $formaters)) {
+            $formaters[] = 'console';
+        }
         foreach ($formaters as $format) {
-            $class = sprintf('\Hal\MutaTesting\Event\Subscriber\Format\%sSubscriber' ,ucfirst(strtolower($format)));
+            $class = sprintf('\Hal\MutaTesting\Event\Subscriber\Format\%sSubscriber', ucfirst(strtolower($format)));
             if (!class_exists($class)) {
                 throw new Exception(sprintf('invalid formater "%s" given', $format));
             }
