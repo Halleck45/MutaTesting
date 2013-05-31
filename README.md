@@ -1,4 +1,4 @@
-# MutaTesting
+# MutaTesting
 
 Mutation testing tool for PHP.
 
@@ -12,7 +12,7 @@ According to [Wikipedia](http://en.wikipedia.org/wiki/Mutation_testing):
   source code or byte code in small ways.
 
 
-## Installation
+## Installation
 
 Edit your `composer.json`:
 
@@ -42,7 +42,7 @@ Example:
 
 ### Advanced usage
 
-To have a html report file, tou need to use the ̀ --format` option. 
+To have a html report file, tou need to use the `--format` option. 
 Remember to give also a `--out` option for the destination directory.
 
 ```bash
