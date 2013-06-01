@@ -1,7 +1,7 @@
 {
     "name": "halleck45/mutatesting",
     "description": "mutation testing tool for PHP",
-    "keywords": ["test", "unit", "mutating testing"],
+    "keywords": ["test", "unit", "mutation testing"],
     "type": "library",
     "licence": "MIT",
     "author": [

@@ -16,7 +16,7 @@ class DiffHtml
     public function diff($from, $to)
     {
         $tool = new \SebastianBergmann\Diff('');
-        
+        $buffer = '';
 
         $diff = $tool->diffToArray($from, $to);
 
