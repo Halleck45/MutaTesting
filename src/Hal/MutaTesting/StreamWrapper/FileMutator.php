@@ -54,16 +54,18 @@ class FileMutator
     {
         return fstat($this->hwnd);
     }
-    
-    public function rmdir($path, $options) {
+
+    public function rmdir($path, $options)
+    {
         stream_wrapper_restore('file');
         $r = rmdir($path);
         stream_wrapper_unregister("file");
         stream_wrapper_register("file", get_class($this));
         return $r;
     }
-    
-    public function unlink($path) {
+
+    public function unlink($path)
+    {
         stream_wrapper_restore('file');
         $r = unlink($path);
         stream_wrapper_unregister("file");
@@ -110,6 +112,15 @@ class FileMutator
         stream_wrapper_unregister("file");
         stream_wrapper_register("file", get_class($this));
         return true;
+    }
+
+    public function stream_lock($operation)
+    {
+        return flock($this->hwnd, $operation);
+    }
+    
+    public function stream_truncate($newsize) {
+        return ftruncate($this->hwnd, $operation);
     }
 
 }

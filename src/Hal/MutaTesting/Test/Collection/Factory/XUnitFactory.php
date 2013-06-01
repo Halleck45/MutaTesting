@@ -4,7 +4,7 @@ namespace Hal\MutaTesting\Test\Collection\Factory;
 
 use Hal\MutaTesting\Test\UnitCollection;
 
-class JUnitFactory
+class XUnitFactory
 {
 
     public function factory($xmlContent)
@@ -16,22 +16,26 @@ class JUnitFactory
             throw new \UnexpectedValueException('Invalid xml given');
         }
 
-        
+
         $nodes = $xml->xpath('//testsuite/testsuite');
         if (!$nodes) {
             $nodes = $xml->xpath('//testsuites/testsuite');
         }
-
         foreach ($nodes as $n => $info) {
             $unit = new \Hal\MutaTesting\Test\Unit;
+
             $unit
                     ->setName((string) $info['name'])
-                    ->setFile((string) $info['file'])
-                    ->setNumOfAssertions((integer) $info['assertions'])
+                    ->setNumOfAssertions('?') // not privided by atoum
                     ->setNumOfErrors((integer) $info['errors'])
                     ->setNumOfFailures((integer) $info['failures'])
-                    ->setTime((string) $info['time'])
-            ;
+                    ->setTime((string) $info['time']);
+
+            $testcases = $info->children();
+            if (sizeof($testcases) > 0) {
+                $unit->setFile((string) $testcases[0]['file']);
+            }
+            
             $collection->push($unit);
         }
         return $collection;

@@ -14,6 +14,8 @@ class AdapterFactory
         switch ($name) {
             case 'phpunit':
                 return new PHPUnitAdapter($binary, $path, $options, $processManager);
+            case 'atoum':
+                return new AtoumAdapter($binary, $path, $options, $processManager);
             default:
                 throw new Exception(sprintf('Unsupported adapter : "%s"', $name));
         }

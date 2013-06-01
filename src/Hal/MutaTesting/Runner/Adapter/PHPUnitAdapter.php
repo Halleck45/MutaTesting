@@ -34,6 +34,11 @@ class PHPUnitAdapter extends BaseAdapter implements AdapterInterface
                     $xml = simplexml_load_file($configFile);
                     $filename = (string) $xml['bootstrap'];
                 }
+                if (preg_match('!--configuration\s*(.*)!', $option, $matches)) {
+                    $configFile = $matches[1];
+                    $xml = simplexml_load_file($configFile);
+                    $filename = (string) $xml['bootstrap'];
+                }
                 if (preg_match('!--bootstrap\s*(.*)!', $option, $matches)) {
                     $filename = $matches[1];
                 }
