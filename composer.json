@@ -1,5 +1,5 @@
 {
-    "name": "halleck45/mutaTesing",
+    "name": "halleck45/MutaTesting",
     "description": "mutation testing tool for PHP",
     "keywords": ["test", "unit", "mutating testing"],
     "type": "library",

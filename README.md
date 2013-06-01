@@ -12,13 +12,20 @@ According to [Wikipedia](http://en.wikipedia.org/wiki/Mutation_testing):
   source code or byte code in small ways.
 
 
+MutaTesting supports [http://phpunit.de/manual/current/en/index.html](PHPUnit) and [http://docs.atoum.org/](atoum). 
+You can create an adapter for any PHP testing framework.
+
+## Requirements
+
+You only need PHP 5.3 . No specific PHP extension is required...
+
 ## Installation
 
 Edit your `composer.json`:
 
 ```json
 "require": {
-    "halleck45/mutaTesting" : "master"
+    "halleck45/MutaTesting" : "master"
 }
 ```
 
@@ -34,11 +41,21 @@ php composer.phar update halleck45/mutaTesting
 ./bin/mutatesting {tool} {binary}  {test directory}
 ```
 
-Example:
+Example for PHPUnit:
 
 ```bash
 ./bin/mutatesting phpunit phpunit.phar myTestFolder
 ```
+
+Example for atoum:
+
+```bash
+./bin/mutatesting atoum mageekguy.atoum.phar myTestFolder
+```
+
+Note that you don't need to use the `-d` or `-f` option with atoum...
+
+
 
 ### Advanced usage
 
