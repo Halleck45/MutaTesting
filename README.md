@@ -25,7 +25,7 @@ Edit your `composer.json`:
 
 ```json
 "require": {
-    "halleck45/MutaTesting" : "master"
+    "halleck45/mutatesting" : "master"
 }
 ```
 
