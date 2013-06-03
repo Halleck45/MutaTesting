@@ -76,6 +76,7 @@ class HtmlSubscriber implements EventSubscriberInterface
                             'mutant' => $survivor
                             , 'diff' => $diff->diff($mutation->getTokens()->asPhp(), $survivor->getTokens()->asPhp())
                 );
+                
             }
         }
 

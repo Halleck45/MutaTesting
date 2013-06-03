@@ -48,7 +48,7 @@ class BaseAdapter implements AdapterInterface
                 . sprintf("\n \Hal\MutaTesting\StreamWrapper\FileMutator::addMutatedFile('%s', '%s'); ?>"
                         , $mutation->getSourceFile(), $temporaryFile);
 
-        $bootstrapFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'bootstrap-' . md5($mutation->getTestFile()) . '.php';
+        $bootstrapFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'bootstrap-' . md5(uniqid()) . '.php';
         file_put_contents($bootstrapFile, $bootstrapContent);
 
         return $bootstrapFile;
@@ -114,6 +114,7 @@ class BaseAdapter implements AdapterInterface
             $process = new Process($this->lastCommand);
             $process->start();
             while ($process->isRunning()) {
+                
             };
             return $process->getOutput();
         }
@@ -146,7 +147,15 @@ class BaseAdapter implements AdapterInterface
     public function getSuiteResult($logPath)
     {
         $factory = new JUnitFactory;
-        $results = $factory->factory(file_get_contents($logPath));
+        if (!file_exists($logPath)) {
+            throw new \Hal\MutaTesting\Test\Exception\TestSuiteNotFoundException(sprintf('results not found. Last command : "%s"', $this->getLastCommand()));
+        }
+        $content = file_get_contents($logPath);
+        if (0 === strlen($content)) {
+            throw new \Hal\MutaTesting\Test\Exception\TestSuiteNotFoundException(sprintf('results are empty. Last command : "%s"', $this->getLastCommand()));
+        }
+
+        $results = $factory->factory($content);
         return $results;
     }
 

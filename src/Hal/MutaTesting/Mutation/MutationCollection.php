@@ -34,7 +34,7 @@ class MutationCollection implements MutationCollectionInterface
         $collection = new MutationCollection;
         foreach ($this->mutations as $mutation) {
             $unit = $mutation->getUnit();
-            if ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0) {
+            if ((null === $unit) || ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0)) {
                 $collection->push($mutation);
             }
         }
