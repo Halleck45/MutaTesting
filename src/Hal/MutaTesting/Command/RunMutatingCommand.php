@@ -21,6 +21,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RunMutatingCommand extends Command
 {
+    private $success = true;
 
     protected function configure()
     {
@@ -123,7 +124,8 @@ class RunMutatingCommand extends Command
                     // processes
                     $dispatcher = $this->getApplication()->getDispatcher();
                     $adapter->runMutation($mutation, array(), null, null, function($unit) use ($dispatcher) {
-                                $dispatcher->dispatch('mutate.mutation', new MutationEvent($unit));
+                                $event = $dispatcher->dispatch('mutate.mutation', new MutationEvent($unit));
+                                $this->success &= !$event->getUnit()->hasFail();
                             }
                     );
                 }
@@ -140,6 +142,8 @@ class RunMutatingCommand extends Command
         $output->writeln('');
         $output->writeln('');
         $output->writeln('<info>Done</info>');
+
+        return ($this->success ? 0 : 1);
     }
 
 }
