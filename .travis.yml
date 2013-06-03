@@ -3,4 +3,7 @@ php:
   - 5.4
 before_script:
   - wget http://getcomposer.org/composer.phar
-  - php composer.phar install 
+  - php composer.phar install
+
+script:
+  - ./vendor/bin/phpunit
