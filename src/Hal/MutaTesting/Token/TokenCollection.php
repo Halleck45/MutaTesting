@@ -52,8 +52,7 @@ class TokenCollection implements TokenCollectionInterface
         return new TokenCollection($tokens);
     }
 
-    public
-            function get($index)
+    public function get($index)
     {
         return isset($this->tokens[$index]) ? $this->tokens[$index] : null;
     }
