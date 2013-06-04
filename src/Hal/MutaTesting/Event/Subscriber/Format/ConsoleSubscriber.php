@@ -73,7 +73,7 @@ class ConsoleSubscriber implements EventSubscriberInterface
             $this->progress('<error>E</error>');
             return;
         }
-        if ($event->getUnit()->getNumOfFailures() == 0 && $event->getUnit()->getNumOfErrors() == 0) {
+        if ($event->getUnit()->hasFail()) {
             $this->progress('L');
         } else {
             $this->progress('.');

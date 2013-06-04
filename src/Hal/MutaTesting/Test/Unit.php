@@ -90,4 +90,8 @@ class Unit implements UnitInterface
         return $this;
     }
 
+    public function hasFail()
+    {
+        return ($this->getNumOfFailures() == 0 && $this->getNumOfErrors() == 0);
+    }
 }
