@@ -59,7 +59,9 @@ class MutaterFactory implements MutaterFactoryInterface
 
         // camelcase
         $classname = strtolower($classname);
-        $classname = preg_replace('/_(.?)/e', "strtoupper('$1')", $classname);
+        $classname = preg_replace_callback('/_(.?)/', function ($matches) {
+            return strtoupper($matches[1]);
+        }, $classname);
         $classname = preg_replace('!(^t)!', '', $classname);
         if (null !== $classname) {
             $classname = '\Hal\MutaTesting\Mutater\Mutater' . $classname;

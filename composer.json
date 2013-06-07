@@ -20,6 +20,9 @@
         "sebastian/diff": "1.0.*@dev",
         "twig/twig": "1.13.*@dev"
     },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*@dev"
+    },
     "autoload": {
         "psr-0": {
             "Hal\\MutaTesting": "src/"
