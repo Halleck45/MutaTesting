@@ -13,6 +13,7 @@ use Hal\MutaTesting\Mutater\Factory\MutaterFactory;
 use Hal\MutaTesting\Mutation\Factory\MutationFactory;
 use Hal\MutaTesting\Runner\Adapter\AdapterFactory;
 use Hal\MutaTesting\Runner\Process\ProcessManager;
+use Hal\MutaTesting\Specification\RandomSpecification;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,6 +49,9 @@ class RunMutatingCommand extends Command
                 )
                 ->addOption(
                         'out', 'o', InputOption::VALUE_REQUIRED, 'Destination directory for html file', null
+                )
+                ->addOption(
+                        'level', 'l', InputOption::VALUE_REQUIRED, 'Probability of mutations : 1: low, 5: high', 3
                 )
         ;
     }
@@ -105,11 +109,14 @@ class RunMutatingCommand extends Command
         $this->getApplication()->getDispatcher()->dispatch('mutate.parseTestedFilesDone', new UnitsResultEvent($units));
 
 
+        // level
+        $mutationSpecification = new RandomSpecification($input->getOption('level'), 5);
+
         // mutation
         $output->writeln("");
         $output->writeln('Executing mutations...');
         $mutaterFactory = new MutaterFactory();
-        $mutationFactory = new MutationFactory($mutaterFactory);
+        $mutationFactory = new MutationFactory($mutaterFactory, $mutationSpecification);
 
         $results = array();
         $processManager = new ProcessManager($input->getOption('processes'));

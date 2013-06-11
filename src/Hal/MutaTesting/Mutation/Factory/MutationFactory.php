@@ -4,6 +4,7 @@ namespace Hal\MutaTesting\Mutation\Factory;
 
 use Hal\MutaTesting\Mutater\Factory\MutaterFactoryInterface;
 use Hal\MutaTesting\Mutation\Mutation;
+use Hal\MutaTesting\Specification\SpecificationInterface;
 use Hal\MutaTesting\Test\UnitInterface;
 use Hal\MutaTesting\Token\TokenCollection;
 
@@ -11,10 +12,12 @@ class MutationFactory
 {
 
     private $mutaterFactory;
+    private $specification;
 
-    public function __construct(MutaterFactoryInterface $mutaterFactory = null)
+    public function __construct(MutaterFactoryInterface $mutaterFactory = null, SpecificationInterface $specification = null)
     {
         $this->mutaterFactory = $mutaterFactory;
+        $this->specification = $specification;
     }
 
     public function factory($code, $fileOrigin, $testFile)
@@ -32,7 +35,9 @@ class MutationFactory
             if ($this->mutaterFactory->isMutable($token)) {
                 $mutater = $this->mutaterFactory->factory($token);
                 $mutated = $mutater->mutate($mutation, $index);
-                $mutation->addMutation($mutated);
+                if ($this->specification->isSatisfedBy($mutated)) {
+                    $mutation->addMutation($mutated);
+                }
             }
         }
 
