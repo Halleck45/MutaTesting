@@ -16,7 +16,6 @@ class BaseAdapter implements AdapterInterface
     protected $binary;
     protected $options;
     protected $testDirectory;
-    protected $lastCommand;
     protected $processManager;
 
     public function __construct($binary, $testDirectory, array $options = array(), ProcessManagerInterface $processManager = null)
@@ -104,18 +103,24 @@ class BaseAdapter implements AdapterInterface
         foreach ($options as $option) {
             $args .= ' ' . $option;
         }
-        $this->lastCommand = "$binary $args $path";
+        $command = "$binary $args $path";
         if ($this->processManager && is_callable($callback)) {
-            $process = new Process($this->lastCommand);
+            $process = new Process($command);
             $this->processManager->push($process, $callback);
             return null;
         } else {
 
-            $process = new Process($this->lastCommand);
+            $process = new Process($command);
             $process->start();
             while ($process->isRunning()) {
                 
             };
+            if (!$process->isSuccessful() || strlen($process->getErrorOutput()) > 0) {
+                throw new \Hal\MutaTesting\Runner\RunningException(sprintf("test terminated with an error.\nDetail: %s \n\nCommand line: %s"
+                        , $process->getErrorOutput()
+                        , $process->getCommandLine()
+                ));
+            }
             return $process->getOutput();
         }
     }
@@ -192,11 +197,6 @@ class BaseAdapter implements AdapterInterface
     public function getTestDirectory()
     {
         return $this->testDirectory;
-    }
-
-    public function getLastCommand()
-    {
-        return $this->lastCommand;
     }
 
     public function setProcessManager(ProcessManagerInterface $processManager)
