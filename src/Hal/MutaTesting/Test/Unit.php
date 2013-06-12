@@ -92,6 +92,6 @@ class Unit implements UnitInterface
 
     public function hasFail()
     {
-        return ($this->getNumOfFailures() == 0 && $this->getNumOfErrors() == 0);
+        return !($this->getNumOfFailures() == 0 && $this->getNumOfErrors() == 0);
     }
 }
