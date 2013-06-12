@@ -15,7 +15,7 @@ class RandomSpecification implements SpecificationInterface
         $this->max = (int) $max;
         $level = (int) $level;
         if (($level < 1) || ($level > $this->max)) {
-            throw new OutOfRangeException(sprintf('level %s is invalid', $level));
+            throw new \OutOfRangeException(sprintf('given level %s is invalid', $level));
         }
         $this->level = $level;
     }
