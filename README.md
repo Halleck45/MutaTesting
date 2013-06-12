@@ -21,11 +21,22 @@ You only need PHP 5.3 . No specific PHP extension is required...
 
 ## Installation
 
+
+### As phar archive
+
+Simply download the [phar archive](build/mutatesting.phar) and run the following command :
+
+```
+./bin/mutatesting {tool} {binary}  {test directory}
+```
+
+### With Composer
+
 Edit your `composer.json`:
 
 ```json
 "require": {
-    "halleck45/mutatesting" : "master"
+    "halleck45/mutatesting" : "@dev"
 }
 ```
 
@@ -56,15 +67,31 @@ Example for atoum:
 Note that you don't need to use the `-d` or `-f` option with atoum...
 
 
-
 ### Advanced usage
+
+#### Strategy
+
+In order to avoid to have too much mutants, you can use specific strategies 
+to determine if a mutant will bu used or not.
+
+There is only one strategy today : the Random strategy. 
+
+To determine to probability of mutations, you can use the `--level` option. `1` = low, `5`= high (default:3)
+
+```bash
+./bin/mutatesting {tool} {binary} {test directory} --level=3
+```
+
+#### Formatters
 
 To have a html report file, tou need to use the `--format` option. 
 Remember to give also a `--out` option for the destination directory.
 
 ```bash
-./bin/mutatesting phpunit phpunit.phar  myTestFolder --format=html --out=./logFolder
+./bin/mutatesting {tool} {binary} {test directory} --format=html --out=./logFolder
 ```
+
+#### Testing options
 
 If your tests need options, you can pass them with `--options`
 
@@ -72,9 +99,11 @@ If your tests need options, you can pass them with `--options`
 ./bin/mutatesting phpunit phpunit.phar  myTestFolder --options="-c phpunit.xml"
 ```
 
+#### Parallelization
+
 You can change the number of parallelized tests with the `processes` options :
 ```bash
-./bin/mutatesting phpunit phpunit.phar  myTestFolder --processes=10
+./bin/mutatesting {tool} {binary} {test directory} --processes=10
 ```
 
 
