@@ -4,7 +4,7 @@ namespace Hal\MutaTesting\Mutater;
 
 use Hal\MutaTesting\Mutation\MutationInterface;
 
-class MutaterBooleanOr implements MutaterInterface
+class MutaterBooleanOr extends MutaterSimpleAbstract implements MutaterInterface
 {
 
     public function mutate(MutationInterface $original, $index)
