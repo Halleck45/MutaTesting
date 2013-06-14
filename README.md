@@ -27,7 +27,7 @@ You only need PHP 5.3 . No specific PHP extension is required...
 Simply download the [phar archive](build/mutatesting.phar) and run the following command :
 
 ```
-./bin/mutatesting {tool} {binary}  {test directory}
+php mutatesting.phar {tool} {binary}  {test directory}
 ```
 
 ### With Composer
