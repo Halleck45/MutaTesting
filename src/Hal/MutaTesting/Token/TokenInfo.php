@@ -5,20 +5,30 @@ namespace Hal\MutaTesting\Token;
 class TokenInfo implements TokenInfoInterface
 {
 
-   private $dependencies = array();
-   
-   public function getDependencies()
-   {
-       return $this->dependencies;
-   }
+    private $dependencies = array();
+    private $complexity;
 
-   public function setDependencies(array $dependencies)
-   {
-       $this->dependencies = $dependencies;
-       return $this;
-   }
+    public function getDependencies()
+    {
+        return $this->dependencies;
+    }
 
+    public function setDependencies(array $dependencies)
+    {
+        $this->dependencies = $dependencies;
+        return $this;
+    }
 
+    public function getComplexity()
+    {
+        return $this->complexity;
+    }
+
+    public function setComplexity($complexity)
+    {
+        $this->complexity = (int) $complexity;
+        return $this;
+    }
 
 }
 
