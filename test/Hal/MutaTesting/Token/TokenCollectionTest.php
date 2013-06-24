@@ -14,26 +14,62 @@ class TokenCollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testICanReplaceTokens()
     {
-        $tokens = new \Hal\MutaTesting\Token\TokenCollection(array(1, 2, 3));
-        $tokensReplaced = $tokens->replace(0, 'A');
 
-        $this->assertEquals(array('A', 2, 3), $tokensReplaced->all());
+        $base = array(
+            array(T_STRING, 1)
+            , array(T_STRING, 2)
+            , array(T_STRING, 3)
+        );
+        $expected = array(
+            array(T_STRING, 1)
+            , array(T_STRING, 'A')
+            , array(T_STRING, 3)
+        );
+
+        $tokens = new \Hal\MutaTesting\Token\TokenCollection($base);
+        $tokensReplaced = $tokens->replace(1, 'A');
+
+        $this->assertEquals($expected, $tokensReplaced->all());
         $this->assertTrue($tokens !== $tokensReplaced); // object value
     }
 
     public function testICanRemoveTokens()
     {
-        $tokens = new \Hal\MutaTesting\Token\TokenCollection(array(1, 2, 3));
+        
+        $base = array(
+            array(T_STRING, 1)
+            , array(T_STRING, 2)
+            , array(T_STRING, 3)
+        );
+        $expected = array(
+            array(T_STRING, 2)
+            , array(T_STRING, 3)
+        );
+        
+        $tokens = new \Hal\MutaTesting\Token\TokenCollection($base);
         $tokensReplaced = $tokens->remove(0);
-        $this->assertEquals(array(1 => 2, 2 => 3), $tokensReplaced->all());
+        $this->assertEquals($expected, $tokensReplaced->all());
         $this->assertTrue($tokens !== $tokensReplaced); // object value
     }
 
     public function testICanRemoveSectionOfTokens()
     {
-        $tokens = new \Hal\MutaTesting\Token\TokenCollection(array(1, 2, 3));
+        
+        $base = array(
+            array(T_STRING, 1)
+            , array(T_STRING, 2)
+            , array(T_STRING, 3)
+            , array(T_STRING, 4)
+        );
+        $expected = array(
+            array(T_STRING, 3)
+            , array(T_STRING, 4)
+        );
+        
+        
+        $tokens = new \Hal\MutaTesting\Token\TokenCollection($base);
         $tokensReplaced = $tokens->remove(0, 1);
-        $this->assertEquals(array(2 => 3), $tokensReplaced->all());
+        $this->assertEquals($expected, $tokensReplaced->all());
         $this->assertTrue($tokens !== $tokensReplaced); // object value
     }
 
@@ -53,6 +89,12 @@ class TokenCollectionTest extends \PHPUnit_Framework_TestCase
             , array('<?php echo "ok";', true, '<?php echo "ok";')
             , array('<?php if(true){}', false, 'if(true){}')
         );
+    }
+
+    public function testICanCountTokens()
+    {
+        $tokens = new \Hal\MutaTesting\Token\TokenCollection(token_get_all('<?php echo 1;echo 2;'));
+        $this->assertEquals(9, $tokens->count());
     }
 
 }

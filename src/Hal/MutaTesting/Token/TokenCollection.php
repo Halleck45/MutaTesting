@@ -30,31 +30,50 @@ class TokenCollection implements TokenCollectionInterface
 
     public function all()
     {
-        return $this->tokens;
+        $return = array();
+        $len = $this->count();
+        for($i = 0; $i < $len ; $i++) {
+            $return[] = $this->get($i);
+        }
+        return $return;
     }
 
     public function replace($index, $token)
     {
-        $tokens = $this->tokens;
+        $tokens = $this->all();
         $tokens[$index] = $token;
         return new TokenCollection($tokens);
     }
 
     public function remove($index, $end = null)
     {
-        $tokens = $this->tokens;
+        $tokens = $this->all();
         if (null === $end) {
             $end = $index;
         }
         for ($i = $index; $i <= $end; $i++) {
             unset($tokens[$i]);
         }
-        return new TokenCollection($tokens);
+        return new TokenCollection(array_values($tokens));
     }
 
     public function get($index)
     {
-        return isset($this->tokens[$index]) ? $this->tokens[$index] : null;
+
+        if(!isset($this->tokens[$index])) {
+            return null;
+        }
+        
+        $token = $this->tokens[$index];
+        if (!isset($token[1])) {
+            $token = array(T_STRING, $token[0]);
+        }
+        return $token;
+    }
+
+    public function count()
+    {
+        return sizeof($this->tokens);
     }
 
 }

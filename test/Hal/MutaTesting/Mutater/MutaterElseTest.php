@@ -26,8 +26,7 @@ class MutaterLogicElseTest extends \PHPUnit_Framework_TestCase
         $mutater = new \Hal\MutaTesting\Mutater\MutaterElse;
         $result = $mutater->mutate($mutation, 19);
         
-        $expected = token_get_all("<?php if(1 == 2) { echo 'ok'; } ");
-        $this->assertEquals($expected, array_values($result->getTokens()->all()));
+        $this->assertFalse((boolean) preg_match('!else!', $result->getTokens()->asPhp()));
     }
 
 }

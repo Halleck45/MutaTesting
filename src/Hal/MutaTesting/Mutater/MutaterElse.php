@@ -20,10 +20,6 @@ class MutaterElse implements MutaterInterface
         $end = false;
         for ($i = $index; $i < $len; $i++) {
             $token = $tokens->get($i);
-            if (!isset($token[1])) {
-                $token = array(T_STRING, $token[0]);
-            }
-            // "}"
             if ($token[0] === T_STRING && $token[1] === '}') {
                 $end = $i;
                 break;
