@@ -13,7 +13,9 @@ use Hal\MutaTesting\Mutater\Factory\MutaterFactory;
 use Hal\MutaTesting\Mutation\Factory\MutationFactory;
 use Hal\MutaTesting\Runner\Adapter\AdapterFactory;
 use Hal\MutaTesting\Runner\Process\ProcessManager;
+use Hal\MutaTesting\Specification\FactorySpecification;
 use Hal\MutaTesting\Specification\RandomSpecification;
+use Hal\MutaTesting\Specification\SubscribableSpecification;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,7 +24,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RunMutatingCommand extends Command
 {
+
     private $success = true;
+    private $strategy = true;
 
     protected function configure()
     {
@@ -51,6 +55,9 @@ class RunMutatingCommand extends Command
                         'out', 'o', InputOption::VALUE_REQUIRED, 'Destination directory for html file', null
                 )
                 ->addOption(
+                        'strategy', 's', InputOption::VALUE_REQUIRED, 'Strategy to use [random,score]', 'random'
+                )
+                ->addOption(
                         'level', 'l', InputOption::VALUE_REQUIRED, 'Probability of mutations : 1: low, 5: high', 3
                 )
         ;
@@ -71,6 +78,15 @@ class RunMutatingCommand extends Command
             }
             $dispatcher->addSubscriber(new $class($input, $output));
         }
+        
+        
+        // strategy
+        $factory = new FactorySpecification();
+        $this->strategy = $factory->factory($input->getOption('strategy'), $input->getOption('level'));
+        if($this->strategy instanceof SubscribableSpecification) {
+            $dispatcher->addSubscriber($this->strategy);
+        }
+
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -109,14 +125,13 @@ class RunMutatingCommand extends Command
         $this->getApplication()->getDispatcher()->dispatch('mutate.parseTestedFilesDone', new UnitsResultEvent($units));
 
 
-        // level
-        $mutationSpecification = new RandomSpecification($input->getOption('level'), 5);
+        
 
         // mutation
         $output->writeln("");
         $output->writeln('Executing mutations...');
         $mutaterFactory = new MutaterFactory();
-        $mutationFactory = new MutationFactory($mutaterFactory, $mutationSpecification);
+        $mutationFactory = new MutationFactory($mutaterFactory, $this->strategy);
 
         $results = array();
         $processManager = new ProcessManager($input->getOption('processes'));
@@ -132,7 +147,7 @@ class RunMutatingCommand extends Command
                     $dispatcher = $this->getApplication()->getDispatcher();
                     $adapter->runMutation($mutation, array(), null, null, function($unit) use ($dispatcher) {
                                 $event = $dispatcher->dispatch('mutate.mutation', new MutationEvent($unit));
-                                $this->success &= !$event->getUnit()->hasFail();
+                                $this->success &= $event->getUnit() && !$event->getUnit()->hasFail();
                             }
                     );
                 }

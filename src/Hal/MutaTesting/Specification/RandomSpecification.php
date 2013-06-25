@@ -7,10 +7,10 @@ use Hal\MutaTesting\Mutation\MutationInterface;
 class RandomSpecification implements SpecificationInterface
 {
 
-    private $max = 5;
-    private $level = 3;
+    private $max;
+    private $level;
 
-    public function __construct($level, $max)
+    public function __construct($level, $max = 5)
     {
         $this->max = (int) $max;
         $level = (int) $level;
