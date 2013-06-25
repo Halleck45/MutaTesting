@@ -28,7 +28,8 @@ class Declaration implements ParserInterface
         $classes = array();
         $parser = new \Hal\MutaTesting\Token\TokenParser($this->tokens);
 
-        $filter = new \Hal\MutaTesting\Token\Filter\FilterNamespaceSeparator();
+        
+        $filter = new \Hal\MutaTesting\Token\Filter\FilterNamespace();
         $tokens = $filter->filter($this->tokens);
 
 

@@ -20,8 +20,8 @@ class TokenParserDeclarationTest extends PHPUnit_Framework_TestCase
 
     public function testICanGetListOfDeclaredClasses()
     {
-        $code = '<?php class Foo { } class Foo\Bar {  public function bar() {}  }';
-        $expected = array('Foo', 'Foo\Bar');
+        $code = '<?php class Foo { } namespace Foo; class Bar {  public function bar() {}  }';
+        $expected = array('\Foo', '\Foo\Bar');
 
         $tokens = new TokenCollection(token_get_all($code));
         $parser = new Declaration($tokens);

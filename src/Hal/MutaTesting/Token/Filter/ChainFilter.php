@@ -2,7 +2,7 @@
 
 namespace Hal\MutaTesting\Token\Filter;
 
-class ChanFilter implements FilterInterface
+class ChainFilter implements FilterInterface
 {
 
     private $filters;

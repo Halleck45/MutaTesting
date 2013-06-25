@@ -2,26 +2,14 @@
 
 namespace Hal\MutaTesting\Token;
 
-class TokenParser implements Parser\ParserInterface
+class TokenParser
 {
 
-    private $parsers;
     private $tokens;
 
     public function __construct(TokenCollectionInterface $tokens)
     {
-        $this->parsers = array(
-            new Parser\Coupling($tokens)
-        );
         $this->tokens = $tokens;
-    }
-
-    public function parse(TokenInfoInterface $result)
-    {
-        foreach ($this->parsers as $parser) {
-            $parser->parse($result);
-        }
-        return $result;
     }
 
     public function getNextNonBlank($index)

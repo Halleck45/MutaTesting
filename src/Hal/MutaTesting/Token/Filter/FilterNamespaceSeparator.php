@@ -39,6 +39,7 @@ class FilterNamespaceSeparator implements FilterInterface
                     break;
             }
         }
+        unset($token); // Please keep the line to avoid references's problems
 
         // we use the map to merge unchanged strings
         $prev = array(T_WHITESPACE);
@@ -56,7 +57,9 @@ class FilterNamespaceSeparator implements FilterInterface
 
             if (false !== $start) {
                 if ($start !== $k) {
-                    unset($mapped[$k]);
+//                    unset($mapped[$k]);
+                    // replace with whitespace
+                    $mapped[$k] = array(T_WHITESPACE, ' ');
                 }
                 $mapped[$start][1] .= $token[1];
             }
