@@ -13,10 +13,12 @@ class Mutation implements MutationInterface
     private $unit;
     private $sourceFile;
     private $testFile;
+    private $mutedTokensIndexes;
 
     public function __construct()
     {
         $this->mutations = new MutationCollection();
+        $this->mutedTokensIndexes = array();
     }
 
     public function getTokens()
@@ -73,5 +75,16 @@ class Mutation implements MutationInterface
         $this->testFile = $testFile;
         return $this;
     }
+
+    public function setMutedTokensIndexes($mutedTokensIndexes)
+    {
+        $this->mutedTokensIndexes = $mutedTokensIndexes;
+    }
+
+    public function getMutedTokensIndexes()
+    {
+        return $this->mutedTokensIndexes;
+    }
+
 
 }

@@ -7,5 +7,5 @@ use Hal\MutaTesting\Mutation\MutationInterface;
 interface SpecificationInterface
 {
 
-    public function isSatisfedBy(MutationInterface $mutation);
+    public function isSatisfedBy(MutationInterface $mutation, $index);
 }

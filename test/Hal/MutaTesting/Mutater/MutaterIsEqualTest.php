@@ -15,6 +15,9 @@ class MutaterIsEqualTest extends \PHPUnit_Framework_TestCase
         $mutation->expects($this->any())
                 ->method('getTokens')
                 ->will($this->returnValue($token));
+        $mutation->expects($this->any())
+            ->method('getMutedTokensIndexes')
+            ->will($this->returnValue(array()));
         
         
 
@@ -25,6 +28,25 @@ class MutaterIsEqualTest extends \PHPUnit_Framework_TestCase
 
         $token = $result->getTokens()->get(0);
         $this->assertEquals(T_IS_NOT_EQUAL, $token[0]);
+    }
+
+    public function testWhenIMutateEqualityIndexOfMutedTokensAreStored() {
+        $token = new \Hal\MutaTesting\Token\TokenCollection(array(array(0 => T_IS_EQUAL, 1 => '==', 2 => 1)));
+        $mutation = $this->getMock('\Hal\MutaTesting\Mutation\MutationInterface');
+        $mutation->expects($this->any())
+            ->method('getTokens')
+            ->will($this->returnValue($token));
+        $mutation->expects($this->any())
+            ->method('getMutedTokensIndexes')
+            ->will($this->returnValue(array()));
+
+
+
+        $mutater = new \Hal\MutaTesting\Mutater\MutaterIsEqual;
+
+        $result = $mutater->mutate($mutation, 0);
+        $this->assertEquals(array(0), $result->getMutedTokensIndexes());
+
     }
 
 }

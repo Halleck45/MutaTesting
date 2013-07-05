@@ -35,7 +35,7 @@ class MutationFactory
             if ($this->mutaterFactory->isMutable($token)) {
                 $mutater = $this->mutaterFactory->factory($token);
                 $mutated = $mutater->mutate($mutation, $index);
-                if ($this->specification->isSatisfedBy($mutated)) {
+                if ($this->specification->isSatisfedBy($mutated, $index)) {
                     $mutation->addMutation($mutated);
                 }
             }

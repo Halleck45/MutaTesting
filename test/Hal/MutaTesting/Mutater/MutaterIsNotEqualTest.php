@@ -15,6 +15,9 @@ class MutaterIsNotEqualTest extends \PHPUnit_Framework_TestCase
         $mutation->expects($this->any())
                 ->method('getTokens')
                 ->will($this->returnValue($token));
+        $mutation->expects($this->any())
+            ->method('getMutedTokensIndexes')
+            ->will($this->returnValue(array()));
 
         $mutater = new \Hal\MutaTesting\Mutater\MutaterIsNotEqual();
 

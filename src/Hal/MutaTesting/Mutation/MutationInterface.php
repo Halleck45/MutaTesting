@@ -27,4 +27,9 @@ interface MutationInterface
     public function getTestFile();
 
     public function setTestFile($file);
+
+    public function setMutedTokensIndexes($mutedTokensIndexes);
+
+    public function getMutedTokensIndexes();
+
 }

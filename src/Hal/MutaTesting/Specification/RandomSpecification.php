@@ -20,7 +20,7 @@ class RandomSpecification implements SpecificationInterface
         $this->level = $level;
     }
 
-    public function isSatisfedBy(MutationInterface $mutation)
+    public function isSatisfedBy(MutationInterface $mutation, $index)
     {
         return $this->level >= rand(1, $this->max);
     }

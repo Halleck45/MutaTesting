@@ -39,7 +39,8 @@ class MutaterElse implements MutaterInterface
                 ->setTokens($tokens)
                 ->setUnit($original->getUnit())
                 ->setSourceFile($original->getSourceFile())
-                ->setTestFile($original->getTestFile());
+                ->setTestFile($original->getTestFile())
+                ->setMutedTokensIndexes(array_merge($original->getMutedTokensIndexes(), range($index, $end)));
 
         return $new;
     }

@@ -7,7 +7,7 @@ use Hal\MutaTesting\Mutation\MutationInterface;
 abstract class MutaterSimpleAbstract implements MutaterInterface
 {
 
-    protected function mutateOne($original, $index, $expected, $newToken)
+    protected function mutateOne(MutationInterface $original, $index, $expected, $newToken)
     {
         $token = $original->getTokens()->get($index);
         if ($token[0] !== $expected) {
@@ -19,7 +19,8 @@ abstract class MutaterSimpleAbstract implements MutaterInterface
                 ->setTokens($original->getTokens()->replace($index, $newToken))
                 ->setUnit($original->getUnit())
                 ->setSourceFile($original->getSourceFile())
-                ->setTestFile($original->getTestFile());
+                ->setTestFile($original->getTestFile())
+                ->setMutedTokensIndexes(array_merge($original->getMutedTokensIndexes(), array($index)));
 
         return $new;
     }
