@@ -14,6 +14,7 @@ use Hal\MutaTesting\Mutation\Factory\MutationFactory;
 use Hal\MutaTesting\Runner\Adapter\AdapterFactory;
 use Hal\MutaTesting\Runner\Process\ProcessManager;
 use Hal\MutaTesting\Specification\RandomSpecification;
+use Hal\MutaTesting\Test\UnitInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -130,7 +131,7 @@ class RunMutatingCommand extends Command
 
                     // processes
                     $dispatcher = $this->getApplication()->getDispatcher();
-                    $adapter->runMutation($mutation, array(), null, null, function($unit) use ($dispatcher) {
+                    $adapter->runMutation($mutation, array(), null, null, function(UnitInterface $unit) use ($dispatcher) {
                                 $event = $dispatcher->dispatch('mutate.mutation', new MutationEvent($unit));
                                 $this->success &= !$event->getUnit()->hasFail();
                             }
