@@ -14,7 +14,7 @@ class MutaterLogicElseTest extends \PHPUnit_Framework_TestCase
     {
 
         $tokens = token_get_all("<?php if(1 == 2) { echo 'ok'; } else {echo 'nok'; }");
-        $token = new \Hal\MutaTesting\Token\TokenCollection($tokens);
+        $token = new \Hal\Component\Token\TokenCollection($tokens);
         
         $mutation = $this->getMock('\Hal\MutaTesting\Mutation\MutationInterface');
         $mutation->expects($this->any())
@@ -29,7 +29,7 @@ class MutaterLogicElseTest extends \PHPUnit_Framework_TestCase
         $mutater = new \Hal\MutaTesting\Mutater\MutaterElse;
         $result = $mutater->mutate($mutation, 19);
         
-        $this->assertFalse((boolean) preg_match('!else!', $result->getTokens()->asPhp()));
+        $this->assertFalse((boolean) preg_match('!else!', $result->getTokens()->asString()));
     }
 
 }

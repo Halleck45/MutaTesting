@@ -2,6 +2,8 @@
 
 namespace Hal\MutaTesting\Mutater\Factory;
 
+use Hal\Component\Token\Token;
+
 class MutaterFactory implements MutaterFactoryInterface
 {
 
@@ -16,6 +18,7 @@ class MutaterFactory implements MutaterFactoryInterface
         , '<=' => 'T_MATH_LESSOREQUAL'
         , 'true' => 'T_BOOLEAN_TRUE'
         , 'false' => 'T_BOOLEAN_FALSE'
+        , 'null' => 'T_NULL'
     );
 
     public function isMutable($token)
@@ -24,7 +27,7 @@ class MutaterFactory implements MutaterFactoryInterface
         return null !== $name && class_exists($name);
     }
 
-    public function factory($token)
+    public function factory(Token $token)
     {
         if (!$this->isMutable($token)) {
             return null;
@@ -33,16 +36,11 @@ class MutaterFactory implements MutaterFactoryInterface
         return new $classname;
     }
 
-    public function getClassnameForToken($token)
+    public function getClassnameForToken(Token $token)
     {
-        if (is_array($token)) {
-            $type = $token[0];
-            $value = $token[1];
-        } else {
-            $type = T_STRING;
-            $value = $token;
-        }
 
+        $type = $token->getType();
+        $value = $token->getValue();
 
         $classname = null;
         switch ($type) {

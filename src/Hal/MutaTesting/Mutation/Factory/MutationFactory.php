@@ -2,11 +2,12 @@
 
 namespace Hal\MutaTesting\Mutation\Factory;
 
+use Hal\Component\Token\TokenCollection;
+use Hal\Component\Token\Tokenizer;
 use Hal\MutaTesting\Mutater\Factory\MutaterFactoryInterface;
 use Hal\MutaTesting\Mutation\Mutation;
 use Hal\MutaTesting\Specification\SpecificationInterface;
 use Hal\MutaTesting\Test\UnitInterface;
-use Hal\MutaTesting\Token\TokenCollection;
 
 class MutationFactory
 {
@@ -20,18 +21,18 @@ class MutationFactory
         $this->specification = $specification;
     }
 
-    public function factory($code, $fileOrigin, $testFile)
+    public function factory($fileOrigin, $testFile)
     {
 
         $mutation = new Mutation;
+        $tokenizer = new Tokenizer();
         $mutation
-                ->setTokens(new TokenCollection(token_get_all($code)))
+                ->setTokens($tokenizer->tokenize($fileOrigin))
                 ->setSourceFile($fileOrigin)
                 ->setTestFile($testFile);
 
 
-        $tokens = token_get_all($code);
-        foreach ($tokens as $index => $token) {
+        foreach ($mutation->getTokens() as $index => $token) {
             if ($this->mutaterFactory->isMutable($token)) {
                 $mutater = $this->mutaterFactory->factory($token);
                 $mutated = $mutater->mutate($mutation, $index);
@@ -39,8 +40,8 @@ class MutationFactory
                     $mutation->addMutation($mutated);
                 }
             }
-        }
 
+        }
 
         return $mutation;
     }

@@ -10,7 +10,7 @@ class MutaterIsNotEqualTest extends \PHPUnit_Framework_TestCase
 
     public function testICanMutateEquality()
     {
-        $token = new \Hal\MutaTesting\Token\TokenCollection(array(array(0 => T_IS_NOT_EQUAL, 1 => '==', 2 => 1)));
+        $token = new \Hal\Component\Token\TokenCollection(array(array(0 => T_IS_NOT_EQUAL, 1 => '==', 2 => 1)));
         $mutation = $this->getMock('\Hal\MutaTesting\Mutation\MutationInterface');
         $mutation->expects($this->any())
                 ->method('getTokens')
@@ -25,7 +25,7 @@ class MutaterIsNotEqualTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Hal\MutaTesting\Mutation\MutationInterface', $result);
 
         $token = $result->getTokens()->get(0);
-        $this->assertEquals(T_IS_EQUAL, $token[0]);
+        $this->assertEquals(T_IS_EQUAL,$token->getType());
     }
 
 }

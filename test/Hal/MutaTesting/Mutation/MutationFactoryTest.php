@@ -29,13 +29,15 @@ class MutationFactoryTest extends \PHPUnit_Framework_TestCase
 
 
         $code = '<?php echo ok;';
-        $file = '/tmp/src1.php';
+        $file = tempnam(sys_get_temp_dir(), 'muta-test');
         $testfile = null;
+        file_put_contents($file, $code);
 
         $factory = new \Hal\MutaTesting\Mutation\Factory\MutationFactory($mutaterFactory);
-        $instance = $factory->factory($code, $file, $testfile);
+        $instance = $factory->factory($file, $testfile);
         $this->assertInstanceOf('\Hal\MutaTesting\Mutation\MutationInterface', $instance);
         $this->assertInstanceOf('\Hal\MutaTesting\Mutation\MutationCollectionInterface', $instance->getMutations());
+        unlink($file);
     }
 
     public function testMutationFactoryUseSpecificationToDetermineIfMutantShouldBeRunned()
@@ -63,11 +65,13 @@ class MutationFactoryTest extends \PHPUnit_Framework_TestCase
                 ->method('isSatisfedBy');
 
         $code = '<?php echo ok;';
-        $file = '/tmp/src1.php';
+        $file = tempnam(sys_get_temp_dir(), 'muta-test');
         $testfile = null;
+        file_put_contents($file, $code);
 
         $factory = new \Hal\MutaTesting\Mutation\Factory\MutationFactory($mutaterFactory, $specification);
-        $instance = $factory->factory($code, $file, $testfile);
+        $instance = $factory->factory( $file, $testfile);
+        unlink($file);
     }
 
 }

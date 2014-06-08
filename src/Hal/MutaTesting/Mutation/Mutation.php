@@ -2,6 +2,7 @@
 
 namespace Hal\MutaTesting\Mutation;
 
+use Hal\Component\Token\TokenCollection;
 use Hal\MutaTesting\Test\UnitInterface;
 use Hal\MutaTesting\Token\TokenCollectionInterface;
 
@@ -26,7 +27,7 @@ class Mutation implements MutationInterface
         return $this->tokens;
     }
 
-    public function setTokens(TokenCollectionInterface $originalCode)
+    public function setTokens(TokenCollection $originalCode)
     {
         $this->tokens = $originalCode;
         return $this;

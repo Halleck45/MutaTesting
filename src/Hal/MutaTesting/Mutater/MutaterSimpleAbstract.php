@@ -2,16 +2,17 @@
 
 namespace Hal\MutaTesting\Mutater;
 
+use Hal\Component\Token\Token;
 use Hal\MutaTesting\Mutation\MutationInterface;
 
 abstract class MutaterSimpleAbstract implements MutaterInterface
 {
 
-    protected function mutateOne(MutationInterface $original, $index, $expected, $newToken)
+    protected function mutateOne(MutationInterface $original, $index, $expected, Token $newToken)
     {
-        $token = $original->getTokens()->get($index);
-        if ($token[0] !== $expected) {
-            throw new \UnexpectedValueException(sprintf('invalid token "%s" given in %s', token_name($token[0]), get_class($this)));
+        $token = $original->getTokens()->offsetGet($index);
+        if ($token->getType() !== $expected) {
+            throw new \UnexpectedValueException(sprintf('invalid token "%s" given in %s', token_name($token->getType()), get_class($this)));
         }
 
         $new = new \Hal\MutaTesting\Mutation\Mutation;

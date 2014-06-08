@@ -2,6 +2,8 @@
 
 namespace Test\Hal\MutaTesting\Mutater;
 
+use Hal\Component\Token\Token;
+
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
 /**
@@ -12,7 +14,7 @@ class MutaterFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testICanFactoryMutaterByToken()
     {
-        $token = array(0 => T_IS_EQUAL, 1 => '==', 2 => 1);
+        $token = new Token(array(0 => T_IS_EQUAL, 1 => '==', 2 => 1));
 
         $factory = new \Hal\MutaTesting\Mutater\Factory\MutaterFactory;
         $instance = $factory->factory($token);
@@ -23,7 +25,7 @@ class MutaterFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testICanObtainTheNameOfMutaterFromToken()
     {
-        $token = array(0 => T_IS_EQUAL, 1 => '==', 2 => 1);
+        $token = new Token(array(0 => T_IS_EQUAL, 1 => '==', 2 => 1));
         $factory = new \Hal\MutaTesting\Mutater\Factory\MutaterFactory;
         $classname = $factory->getClassnameForToken($token);
 
