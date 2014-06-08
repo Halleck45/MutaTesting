@@ -17,10 +17,14 @@ class TextSubscriber implements EventSubscriberInterface
     private $output;
     private $cursor = 80;
 
-    public function __construct(InputInterface $input, OutputInterface $output)
+    public function __construct(InputInterface $input, OutputInterface $output, $filename)
     {
         $this->input = $input;
         $this->output = $output;
+        $this->filename = $filename;
+        if (!file_exists(dirname($this->filename))) {
+            throw new \LogicException('Please create the [TextReport] destination folder first');
+        }
     }
 
     public static function getSubscribedEvents()
@@ -32,9 +36,10 @@ class TextSubscriber implements EventSubscriberInterface
 
     public function onMutationsDone(\Hal\MutaTesting\Event\MutationsDoneEvent $event)
     {
+        $text = '';
         $found = 0;
         $nbMutants = 0;
-        $diff = new \SebastianBergmann\Diff;
+        $diff = new \SebastianBergmann\Diff\Diff;
         foreach ($event->getMutations() as $mutation) {
 
             $nbMutants += sizeof($mutation->getMutations());
@@ -43,13 +48,16 @@ class TextSubscriber implements EventSubscriberInterface
                 $unit = $mutated->getUnit();
                 if ($unit->getNumOfFailures() == 0 && $unit->getNumOfErrors() == 0) {
                     $found++;
-                    $this->output->writeln('');
-                    $this->output->writeln('');
-                    $this->output->writeln(sprintf('    Mutation survived in %s', $mutation->getSourceFile()));
-                    $this->output->writeln("\t" . str_replace(PHP_EOL, PHP_EOL . "\t", $diff->diff($mutation->getTokens()->asPhp(), $mutated->getTokens()->asPhp())));
+                    $text .= PHP_EOL.PHP_EOL;
+                    $text .= sprintf('    Mutation survived in %s', $mutation->getSourceFile());
+                    $text .= "\t" . str_replace(PHP_EOL, PHP_EOL . "\t", $diff->diff($mutation->getTokens()->asString(), $mutated->getTokens()->asString()));
                 }
             }
         }
+
+        // write file
+        file_put_contents($this->filename, $text);
+        $this->output->writeln(sprintf('<info>file "%s" created', $this->filename));
     }
 
 }

@@ -13,21 +13,17 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class HtmlSubscriber implements EventSubscriberInterface
 {
 
+    private $filename;
     private $input;
     private $output;
-    private $directory;
 
-    public function __construct(InputInterface $input, OutputInterface $output)
+    public function __construct(InputInterface $input, OutputInterface $output, $filename)
     {
         $this->input = $input;
         $this->output = $output;
-        $this->directory = $input->getOption('out');
-        if (strlen($this->directory) == 0) {
-            throw new \Exception(sprintf('You need to use the --out option when the HTML formater is ised'));
-        }
-        $this->directory = rtrim($this->directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        if (!file_exists($this->directory)) {
-            mkdir($this->directory, 0777, true);
+        $this->filename = $filename;
+        if (!file_exists(dirname($this->filename))) {
+            throw new \LogicException('Please create the [HtmlReport] destination folder first');
         }
     }
 
@@ -74,7 +70,7 @@ class HtmlSubscriber implements EventSubscriberInterface
             foreach ($mutation->getMutations()->getSurvivors()->all() as $survivor) {
                 $byFile[$src]->survivedMutations[] = (object) array(
                             'mutant' => $survivor
-                            , 'diff' => $diff->diff($mutation->getTokens()->asPhp(), $survivor->getTokens()->asPhp())
+                            , 'diff' => $diff->diff($mutation->getTokens()->asString(), $survivor->getTokens()->asString())
                 );
                 
             }
@@ -87,9 +83,8 @@ class HtmlSubscriber implements EventSubscriberInterface
         ));
 
         // write file
-        $filename = $this->directory . 'mutation.html';
-        file_put_contents($filename, $html);
-        $this->output->writeln(sprintf('<info>file "%s" created', $filename));
+        file_put_contents($this->filename, $html);
+        $this->output->writeln(sprintf('<info>file "%s" created', $this->filename));
     }
 
 }

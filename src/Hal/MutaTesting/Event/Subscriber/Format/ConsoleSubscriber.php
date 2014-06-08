@@ -3,6 +3,7 @@
 namespace Hal\MutaTesting\Event\Subscriber\Format;
 
 use Hal\MutaTesting\Event\FirstRunEvent;
+use Hal\MutaTesting\Event\MutationCreatedEvent;
 use Hal\MutaTesting\Event\MutationEvent;
 use Hal\MutaTesting\Event\ParseTestedFilesEvent;
 use Hal\MutaTesting\Event\UnitsResultEvent;
@@ -31,6 +32,8 @@ class ConsoleSubscriber implements EventSubscriberInterface
             , 'mutate.parseTestedFilesDone' => array('onParseTestedFilesEnd', 0)
             , 'mutate.mutation' => array('onMutation', 0)
             , 'mutate.mutationsDone' => array('onMutationsDone', 0)
+            , 'mutate.mutationCreated' => array('onMutationCreated', 0)
+            , 'mutate.mutationCreatedDone' => array('onMutationCreatedDone', 0)
         );
     }
 
@@ -56,15 +59,22 @@ class ConsoleSubscriber implements EventSubscriberInterface
         $this->progress('.');
     }
 
+
+    public function onMutationCreated(MutationCreatedEvent $event)
+    {
+        $this->progress('.');
+    }
+
+    public function onMutationCreatedDone(MutationCreatedEvent $event)
+    {
+        $this->cursor = 0;
+    }
+
     public function onParseTestedFilesEnd(UnitsResultEvent $event)
     {
-//        $units = $event->getUnits();
-//        $nbFiles = array_reduce($units->all(), function($n, $unit) {
-//                    $n += sizeof($unit->getTestedFiles());
-//                    return $n;
-//                });
-//        $this->output->writeln(sprintf(PHP_EOL . '  %d source files are used by tests', $nbFiles));
+        $this->cursor = 0;
     }
+
 
     public function onMutation(MutationEvent $event)
     {
@@ -83,6 +93,7 @@ class ConsoleSubscriber implements EventSubscriberInterface
     public function onMutationsDone(\Hal\MutaTesting\Event\MutationsDoneEvent $event)
     {
 
+        $this->output->writeln('');
         $this->output->writeln('');
         $this->output->writeln('Result:');
 
