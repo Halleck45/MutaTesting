@@ -63,4 +63,9 @@ class MutaTestingApplication extends Application
         return $this;
     }
 
+    public function getVersion()
+    {
+        return '0.2';
+    }
+
 }

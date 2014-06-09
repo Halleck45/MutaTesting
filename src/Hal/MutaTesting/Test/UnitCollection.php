@@ -14,7 +14,12 @@ class UnitCollection implements UnitCollectionInterface
 
     public function getIterator()
     {
-        return $this->datas;
+        return new \ArrayIterator($this->datas);
+    }
+
+    public function set($index, $v) {
+        $this->datas[$index] = $v;
+        return $this;
     }
 
     public function push(UnitInterface $unit)

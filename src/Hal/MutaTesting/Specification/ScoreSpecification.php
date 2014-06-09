@@ -2,6 +2,10 @@
 
 namespace Hal\MutaTesting\Specification;
 
+use Hal\Component\Token\Tokenizer;
+use Hal\Metrics\Complexity\Structural\CardAndAgresti\FileSystemComplexity;
+use Hal\Metrics\Complexity\Text\Halstead\Halstead;
+use Hal\Metrics\Complexity\Text\Halstead\Result;
 use Hal\MutaTesting\Event\UnitsResultEvent;
 use Hal\MutaTesting\Mutation\MutationInterface;
 use Hal\MutaTesting\Token\Parser;
@@ -10,55 +14,43 @@ use Hal\MutaTesting\Token\TokenInfo;
 class ScoreSpecification implements SpecificationInterface, SubscribableSpecification
 {
 
+    private $notes = array();
+    private $alreadyMuted = array();
     private $limit;
-    private $allTokens = array();
-    private $generalParser = array();
+    private $halstead;
 
-    public function __construct()
+
+    public function __construct(Halstead $halstead, $limit)
     {
-        $this->limit = 300;
-        $this->generalParser = new Parser\General\Coupling($this->allTokens);
+        $this->halstead = $halstead;
+        $this->limit = (float) $limit;
     }
 
     public function isSatisfedBy(MutationInterface $mutation, $index)
     {
-        $tokens = $mutation->getTokens();
 
+        $filename = $mutation->getSourceFile();
 
-        if (!isset($this->allTokens[$mutation->getSourceFile()])) {
-            return true;
+        //
+        // Avoid to make same mutations
+        if(!isset($this->alreadyMuted[$filename])) {
+            $this->alreadyMuted[$filename] = array();
         }
-        $originalTokens = $this->allTokens[$mutation->getSourceFile()];
-
-        $diff = array();
-        foreach ($tokens->all() as $index => $token) {
-            if ($originalTokens->get($index) !== $token) {
-                if (!isset($this->alreadyTestedTokens[$mutation->getSourceFile()])) {
-                    $this->alreadyTestedTokens[$mutation->getSourceFile()] = array();
-                }
-                if (!isset($this->alreadyTestedTokens[$mutation->getSourceFile()][$index])) {
-                    $this->alreadyTestedTokens[$mutation->getSourceFile()][$index] = 0;
-                }
-                $this->alreadyTestedTokens[$mutation->getSourceFile()][$index]++;
+        foreach($mutation->getMutedTokensIndexes() as $index) {
+            if(isset($this->alreadyMuted[$filename][$index])) {
+                return false;
             }
+            $this->alreadyMuted[$filename][$index] = 1;
         }
-        $diff = array_diff($originalTokens->all(), $tokens->all());
 
-        // @todo méthode pour directement avoir les modifications sur un token
-        var_dump($diff);
+        //
+        // keep only complex files
+        if(!isset($this->notes[$filename])) {
+            $bugs = $this->halstead->calculate($filename)->getBugs();
+            $this->notes[$filename] = $bugs;
+        }
 
-
-
-        $info = new TokenInfo();
-        $parser = new Parser\Chain(
-                array(new Parser\Coupling($tokens), new Parser\Complexity($tokens)
-                ), $tokens);
-
-        $parser->parse($info);
-        $this->generalParser->parse($tokens, $info);
-
-        $sum = $info->getComplexity() * $info->getCoupling();
-        return $sum > $this->limit;
+        return $this->notes[$filename] > $this->limit;
     }
 
     public static function getSubscribedEvents()
@@ -70,11 +62,12 @@ class ScoreSpecification implements SpecificationInterface, SubscribableSpecific
 
     public function onParseTestedFilesEnd(UnitsResultEvent $event)
     {
+        $tokenizer = new Tokenizer();
         $units = $event->getUnits();
         foreach ($units->all() as $unit) {
             $testedFiles = $unit->getTestedFiles();
             foreach ($testedFiles as $filename) {
-                $tokens = new \Hal\MutaTesting\Token\TokenCollection(token_get_all(file_get_contents($filename)));
+                $tokens = new \Hal\MutaTesting\Token\TokenCollection($tokenizer->tokenize($filename));
                 array_push($this->allTokens, $tokens);
             }
         }

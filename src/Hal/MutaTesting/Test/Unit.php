@@ -13,6 +13,15 @@ class Unit implements UnitInterface
     private $numOfAssertions;
     private $testedFiles = array();
 
+
+    public static function __set_state(array $array) {
+        $obj = new static;
+        foreach($array as $k => $v) {
+            $obj->{$k} = $v;
+        }
+        return $obj;
+    }
+
     public function getFile()
     {
         return $this->file;

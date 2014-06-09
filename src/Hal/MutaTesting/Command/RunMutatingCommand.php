@@ -3,7 +3,16 @@
 namespace Hal\MutaTesting\Command;
 
 use Exception;
+use Hal\Component\OOP\Extractor\ClassMap;
+use Hal\Component\OOP\Extractor\Extractor;
+use Hal\Component\Token\Tokenizer;
+use Hal\Component\Token\TokenType;
+use Hal\Metrics\Complexity\Structural\CardAndAgresti\FileSystemComplexity;
+use Hal\Metrics\Complexity\Text\Halstead\Halstead;
+use Hal\MutaTesting\Cache\OOPInfo;
+use Hal\MutaTesting\Cache\UnitInfo;
 use Hal\MutaTesting\Event\FirstRunEvent;
+use Hal\MutaTesting\Event\MutationCreatedEvent;
 use Hal\MutaTesting\Event\MutationEvent;
 use Hal\MutaTesting\Event\MutationsDoneEvent;
 use Hal\MutaTesting\Event\ParseTestedFilesEvent;
@@ -15,6 +24,7 @@ use Hal\MutaTesting\Runner\Adapter\AdapterFactory;
 use Hal\MutaTesting\Runner\Process\ProcessManager;
 use Hal\MutaTesting\Specification\FactorySpecification;
 use Hal\MutaTesting\Specification\RandomSpecification;
+use Hal\MutaTesting\Specification\ScoreSpecification;
 use Hal\MutaTesting\Specification\SubscribableSpecification;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -46,54 +56,51 @@ class RunMutatingCommand extends Command
                         'options', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Default options used as argument to run your tests'
                 )
                 ->addOption(
-                        'processes', null, InputOption::VALUE_REQUIRED, 'number maximum of parallelized tests', 10
+                        'processes', null, InputOption::VALUE_REQUIRED, 'number maximum of parallelized tests', 5
                 )
                 ->addOption(
-                        'format', 'f', InputOption::VALUE_REQUIRED, 'Format (text|html|console)', 'console'
+                        'report-text', 'rt', InputOption::VALUE_OPTIONAL, 'Destination of HTML report file (ex: /tmp/file.html)'
                 )
                 ->addOption(
-                        'out', 'o', InputOption::VALUE_REQUIRED, 'Destination directory for html file', null
+                        'report-html', 'rh', InputOption::VALUE_OPTIONAL, 'Destination of TXT report file (ex: /tmp/file.txt)'
                 )
+
                 ->addOption(
-                        'strategy', 's', InputOption::VALUE_REQUIRED, 'Strategy to use [random,score]', 'random'
-                )
-                ->addOption(
-                        'level', 'l', InputOption::VALUE_REQUIRED, 'Probability of mutations : 1: low, 5: high', 3
+                        'bugs', 'bl', InputOption::VALUE_OPTIONAL, 'Mutation is runned only if the estimated number of bugs in tested file is greater than <bugs>.', '.35'
                 )
         ;
     }
 
     protected function prepare(InputInterface $input, OutputInterface $output)
     {
-        // formaters
+        $availables = array('text', 'html');
         $dispatcher = $this->getApplication()->getDispatcher();
-        $formaters = explode(',', $input->getOption('format'));
-        if (!in_array('console', $formaters)) {
-            $formaters[] = 'console';
-        }
-        foreach ($formaters as $format) {
-            $class = sprintf('\Hal\MutaTesting\Event\Subscriber\Format\%sSubscriber', ucfirst(strtolower($format)));
-            if (!class_exists($class)) {
-                throw new Exception(sprintf('invalid formater "%s" given', $format));
+        foreach($availables as $format) {
+
+            if(strlen($input->getOption('report-'.$format)) > 0) {
+                $filename = $input->getOption('report-'.$format);
+
+                $class = sprintf('\Hal\MutaTesting\Event\Subscriber\Format\%sSubscriber', ucfirst(strtolower($format)));
+                if (!class_exists($class)) {
+                    throw new Exception(sprintf('invalid formater "%s" given', $format));
+                }
+                $dispatcher->addSubscriber(new $class($input, $output, $filename));
             }
-            $dispatcher->addSubscriber(new $class($input, $output));
-        }
-        
-        
-        // strategy
-        $factory = new FactorySpecification();
-        $this->strategy = $factory->factory($input->getOption('strategy'), $input->getOption('level'));
-        if($this->strategy instanceof SubscribableSpecification) {
-            $dispatcher->addSubscriber($this->strategy);
         }
 
+        $dispatcher->addSubscriber(new ConsoleSubscriber($input, $output, null));
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
         // version, author
-        $output->writeln('mutation testing tool for PHP, by Jean-François Lépine');
+        $output->writeln('Mutation testing tool for PHP, by Jean-François Lépine <http://www.lepine.pro>');
         $output->writeln('');
+
+        //
+        // Cache
+        $cache = new UnitInfo();
 
         // get adapter
         $this->prepare($input, $output);
@@ -107,9 +114,10 @@ class RunMutatingCommand extends Command
 
         // First run
         $log = tempnam(sys_get_temp_dir(), 'ru-mutate');
-        $output->writeln('Executing first run...');
+        $output->writeln('Executing test suite...');
         $adapter->run(null, array(), $log);
         $units = $adapter->getSuiteResult($log);
+        unlink($log);
 
         // event
         $event = new FirstRunEvent($units);
@@ -117,43 +125,82 @@ class RunMutatingCommand extends Command
 
 
         // Get the tested files
-        $output->writeln('Extracting tested files for each test...');
-        foreach ($units->all() as $unit) {
-            $adapter->parseTestedFiles($unit);
+        $output->writeln('Extracting tested files...');
+        foreach ($units as $k => $unit) {
+            if(!$cache->has($unit)) {
+                $adapter->parseTestedFiles($unit);
+                $cache->persist($unit);
+            } else {
+                $unit = $cache->get($unit);
+                $units->set($k, $unit);
+            }
             $this->getApplication()->getDispatcher()->dispatch('mutate.parseTestedFiles', new ParseTestedFilesEvent($unit));
         }
         $this->getApplication()->getDispatcher()->dispatch('mutate.parseTestedFilesDone', new UnitsResultEvent($units));
+        $cache->flush();
 
 
-        
+        $this->strategy = new ScoreSpecification(
+            new Halstead(new Tokenizer(), new TokenType())
+            , $input->getOption('level')
+        );
+        $this->getApplication()->getDispatcher()->addSubscriber($this->strategy);
 
-        // mutation
-        $output->writeln("");
-        $output->writeln('Executing mutations...');
+        //
+        // Preparing mutations
+        $output->writeln('');
+        $output->writeln('');
+        $output->writeln('Building mutations. This will take few minutes...');
+        $mutaterFactory = new MutaterFactory();
+        $mutationFactory = new MutationFactory($mutaterFactory, $this->strategy);
+        $mutations = array();
+        $nbMutations = 0;
+        foreach ($units as $unit) {
+            foreach ($unit->getTestedFiles() as $filename) {
+                $mainMutation = $mutationFactory->factory( $filename, $unit->getFile());
+
+                $childs = array();
+                foreach ($mainMutation->getMutations() as $mutation) {
+                    $childs[] = $mutation;
+                }
+                $mutations[] = (object) array(
+                    'mainMutation' => $mainMutation
+                    , 'childs' => $childs
+                );
+
+                $nbMutations += sizeof($childs);
+            }
+            $this->getApplication()->getDispatcher()->dispatch('mutate.mutationCreated', new MutationCreatedEvent($unit));
+        }
+        $this->getApplication()->getDispatcher()->dispatch('mutate.mutationCreatedDone', new MutationCreatedEvent($unit));
+
+
+        //
+        // Executing mutations
+        $output->writeln('');
+        $output->writeln('');
+        $output->writeln(sprintf('Executing %d mutations. This will take few minutes. Coffee time ?', $nbMutations));
         $mutaterFactory = new MutaterFactory();
         $mutationFactory = new MutationFactory($mutaterFactory, $this->strategy);
 
         $results = array();
         $processManager = new ProcessManager($input->getOption('processes'));
         $adapter->setProcessManager($processManager);
-        foreach ($units->all() as $unit) {
-            foreach ($unit->getTestedFiles() as $filename) {
 
-                $mainMutation = $mutationFactory->factory(file_get_contents($filename), $filename, $unit->getFile());
 
-                foreach ($mainMutation->getMutations() as $mutation) {
+        foreach($mutations as $mutationInfo) {
 
-                    // processes
-                    $dispatcher = $this->getApplication()->getDispatcher();
-                    $adapter->runMutation($mutation, array(), null, null, function($unit) use ($dispatcher) {
-                                $event = $dispatcher->dispatch('mutate.mutation', new MutationEvent($unit));
-                                $this->success &= $event->getUnit() && !$event->getUnit()->hasFail();
-                            }
-                    );
-                }
-
-                $results[] = $mainMutation;
+            $mainMutation = $mutationInfo->mainMutation;
+            $childs = $mutationInfo->childs;
+            foreach($childs as $mutation) {
+                $dispatcher = $this->getApplication()->getDispatcher();
+                $adapter->runMutation($mutation, array(), null, null, function($unit) use ($dispatcher) {
+                        $event = $dispatcher->dispatch('mutate.mutation', new MutationEvent($unit));
+                        $this->success &= $event->getUnit() && !$event->getUnit()->hasFail();
+                    }
+                );
             }
+            $results[] = $mainMutation;
         }
 
         $processManager->wait();
