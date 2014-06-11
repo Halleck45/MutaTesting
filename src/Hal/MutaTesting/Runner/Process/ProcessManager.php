@@ -38,7 +38,8 @@ class ProcessManager implements ProcessManagerInterface
             if ($this->getNbRunning() == 0) {
                 $finished = true;
             }
-            sleep(1);
+            gc_collect_cycles();
+            sleep(2);
         }
     }
 

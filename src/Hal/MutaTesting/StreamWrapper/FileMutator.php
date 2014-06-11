@@ -24,9 +24,20 @@ class FileMutator
     public function stream_open($path, $mode, $options, &$opened_path)
     {
         // avoid to load files listed in "self::$FILES_TO_MUTATE"
-        if (in_array($path, self::$FILES_TO_MUTATE)) {
+//        if (in_array($path, self::$FILES_TO_MUTATE)) {
+//            $path = self::$FILES_TO_MUTATE[$path];
+//        }
+//        if (in_array(realpath($path), self::$FILES_TO_MUTATE)) {
+//            $path = self::$FILES_TO_MUTATE[$path];
+//        }
+
+        if (isset(self::$FILES_TO_MUTATE[$path])) {
             $path = self::$FILES_TO_MUTATE[$path];
         }
+        if (isset(self::$FILES_TO_MUTATE[realpath($path)])) {
+            $path = self::$FILES_TO_MUTATE[realpath($path)];
+        }
+
 
         stream_wrapper_restore('file');
         $this->hwnd = fopen($path, $mode, $options);

@@ -2,6 +2,7 @@
     <testsuites>
         <testsuite name="MutaTesting suite">
             <directory>./test</directory>
+            <exclude>./test/resources</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

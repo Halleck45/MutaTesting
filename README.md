@@ -12,7 +12,7 @@ According to [Wikipedia](http://en.wikipedia.org/wiki/Mutation_testing):
   source code or byte code in small ways.
 
 
-MutaTesting supports [http://phpunit.de/manual/current/en/index.html](PHPUnit) and [http://docs.atoum.org/](atoum). 
+MutaTesting supports [PHPUnit](http://phpunit.de/manual/current/en/index.html) and [atoum](http://docs.atoum.org/).
 You can create an adapter for any PHP testing framework.
 
 ## Requirements
@@ -71,8 +71,10 @@ Note that you don't need to use the `-d` or `-f` option with atoum...
 
 #### Strategy
 
-In order to avoid to have too much mutants, you can use specific strategies 
-to determine if a mutant will bu used or not.
+In order to avoid to have too much mutants, MutaTesting uses [PhpMetrics](https://github.com/Halleck45/PhpMetrics) in order
+to estimate number of bugs in each tested file, and focuses only on files that contain more anomalies.
+
+You can use --level
 
 There is only one strategy today : the Random strategy. 
 
@@ -84,11 +86,10 @@ To determine to probability of mutations, you can use the `--level` option. `1` 
 
 #### Formatters
 
-To have a html report file, tou need to use the `--format` option. 
-Remember to give also a `--out` option for the destination directory.
+To have a html report file, tou need to use the `--report-html` option.
 
 ```bash
-./bin/mutatesting {tool} {binary} {test directory} --format=html --out=./logFolder
+./bin/mutatesting {tool} {binary} {test directory} --report-html=/tmp/file.html
 ```
 
 #### Testing options
@@ -107,6 +108,12 @@ You can change the number of parallelized tests with the `processes` options :
 ```
 
 
+#### Performance
+
+MutaTesting is very slow : your unit tests will be runned as many times as there are mutant.
+In order to increase performance, a cache file is created in `/tmp/muta-cache.php`.
+
+
 ## Copyright
 
-Copyright (c) 2013 Jean-François Lépine. See LICENSE for details.
+Copyright (c) 2014 Jean-François Lépine. See LICENSE for details.

@@ -16,7 +16,7 @@ class BaseAdapterTest extends \PHPUnit_Framework_TestCase
     public function testICanGetFIleToPrependInOrderToMockSources()
     {
         $mutation = $this->getMock('\Hal\MutaTesting\Mutation\MutationInterface');
-        $tokens = $this->getMock('\Hal\MutaTesting\Token\TokenCollection', array(), array(array()));
+        $tokens = $this->getMock('\Hal\Component\Token\TokenCollection', array(), array(array()));
         $mutation->expects($this->any())
                 ->method('getTokens')
                 ->will($this->returnValue($tokens));

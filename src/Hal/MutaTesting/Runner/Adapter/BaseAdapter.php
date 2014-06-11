@@ -17,6 +17,7 @@ class BaseAdapter implements AdapterInterface
     protected $options;
     protected $testDirectory;
     protected $processManager;
+    private $lastCommand;
 
     public function __construct($binary, $testDirectory, array $options = array(), ProcessManagerInterface $processManager = null)
     {
@@ -38,7 +39,7 @@ class BaseAdapter implements AdapterInterface
     {
         // temporary file
         $temporaryFile = tempnam(sys_get_temp_dir(), 'mutate-mock');
-        file_put_contents($temporaryFile, $mutation->getTokens()->asPhp());
+        file_put_contents($temporaryFile, $mutation->getTokens()->asString());
 
         // mocking system
         $bootstrapContent = ''
@@ -79,6 +80,7 @@ class BaseAdapter implements AdapterInterface
                 };
 
         $this->run($mutation->getTestFile(), array(), $logFile, $prependFile, $cb);
+
     }
 
     /**
@@ -103,10 +105,20 @@ class BaseAdapter implements AdapterInterface
         foreach ($options as $option) {
             $args .= ' ' . $option;
         }
-        $command = "$binary $args $path";
+        $command = $this->lastCommand = "$binary $args $path";
+
         if ($this->processManager && is_callable($callback)) {
+            // needed to unlink temporary file
+            if(!is_null($prependFile)) {
+                $cb = function() use($prependFile, $callback) {
+                    unlink($prependFile);
+                    $callback();
+                };
+            } else {
+                $cb = $callback;
+            }
             $process = new Process($command);
-            $this->processManager->push($process, $callback);
+            $this->processManager->push($process, $cb);
             return null;
         } else {
 
@@ -115,6 +127,9 @@ class BaseAdapter implements AdapterInterface
             while ($process->isRunning()) {
                 
             };
+            if(!is_null($prependFile)) {
+                unlink($prependFile);
+            }
             if (!$process->isSuccessful() || strlen($process->getErrorOutput()) > 0) {
                 throw new \Hal\MutaTesting\Runner\RunningException(sprintf("test terminated with an error.\nDetail: %s \n\nCommand line: %s"
                         , $process->getErrorOutput()
@@ -160,7 +175,12 @@ class BaseAdapter implements AdapterInterface
             throw new \Hal\MutaTesting\Test\Exception\TestSuiteNotFoundException(sprintf('results are empty. Last command : "%s"', $this->getLastCommand()));
         }
 
-        $results = $factory->factory($content);
+        try {
+            $results = $factory->factory($content);
+        } catch (\UnexpectedValueException $e) {
+            throw new \LogicException(sprintf("Cannot get any informations about tests. There is probably no test with your configuration. \n[Executed command : %s]", $this->getLastCommand()));
+        }
+
         return $results;
     }
 
@@ -203,6 +223,11 @@ class BaseAdapter implements AdapterInterface
     {
         $this->processManager = $processManager;
         return $this;
+    }
+
+
+    public function getLastCommand() {
+        return $this->lastCommand;
     }
 
 }

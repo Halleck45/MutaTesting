@@ -1,31 +1,35 @@
 <?php
 chdir(__DIR__);
 
+if (!file_exists('vendor/autoload.php')) {
+    echo '[ERROR] It\'s required to run "composer install" before building MutaTesting!' . PHP_EOL;
+    exit(1);
+}
+
 $filename = 'build/mutatesting.phar';
 if (file_exists($filename)) {
     unlink($filename);
 }
 
-$phar = new \Phar($filename, 0, 'extension.phar');
+$phar = new \Phar($filename, 0, 'mutatesting.phar');
 $phar->setSignatureAlgorithm(\Phar::SHA1);
 $phar->startBuffering();
 
 
-$files = rglob('*.php');
-$exclude = array(':(Compiler.php$!', 'ClassLoader.php$', "!.git!");
-$exclude = '!(Compiler.php$)|(ClassLoader.php$)|(.git)|(.svn)|(Test.php$)!';
+$files = array_merge(rglob('*.php'), rglob('*.twig'), rglob('*.json'));
+$exclude = '!(.git)|(.svn)!';
 foreach($files as $file) {
     if(preg_match($exclude, $file)) continue;
-    $phar->addFromString($file, file_get_contents($file));
+    $path = str_replace(__DIR__.'/', '', $file);
+    $phar->addFromString($path, file_get_contents($file));
 }
 
-$phar->addFromString('init.php', file_get_contents(__DIR__.'/init.php'));
-
 $phar->setStub(<<<STUB
+#!/usr/bin/env php
 <?php
 
 /*
-* This file is part of the MutaTesting
+* This file is part of the PhpMetrics
 *
 * (c) Jean-François Lépine
 *
@@ -33,14 +37,21 @@ $phar->setStub(<<<STUB
 * with this source code in the file LICENSE.
 */
 
-Phar::mapPhar('extension.phar');
+Phar::mapPhar('mutatesting.phar');
 
-return require 'phar://extension.phar/init.php';
+require_once 'phar://mutatesting.phar/vendor/autoload.php';
+\$dispatcher = new Symfony\Component\EventDispatcher\EventDispatcher();
+\$app = new Hal\MutaTesting\Console\MutaTestingApplication('MutaTesting', '0.2');
+\$app->setDispatcher(\$dispatcher);
+\$app->run();
+
 
 __HALT_COMPILER();
 STUB
 );
 $phar->stopBuffering();
+
+chmod($filename, 0755);
 
 function rglob($pattern='*', $flags = 0, $path='')
 {
