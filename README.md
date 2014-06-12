@@ -3,7 +3,7 @@
 Mutation testing tool for PHP.
 
 [![Build Status](https://secure.travis-ci.org/Halleck45/MutaTesting.png)](http://travis-ci.org/Halleck45/MutaTesting)
-
+[![Latest Stable Version](https://poser.pugx.org/halleck45/mutatesting/v/stable.png)](https://packagist.org/packages/halleck45/mutatesting)
 
 According to [Wikipedia](http://en.wikipedia.org/wiki/Mutation_testing):
 
