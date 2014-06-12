@@ -64,7 +64,6 @@ class RunMutatingCommand extends Command
                 ->addOption(
                         'report-html', 'rh', InputOption::VALUE_OPTIONAL, 'Destination of TXT report file (ex: /tmp/file.txt)'
                 )
-
                 ->addOption(
                         'bugs', 'bl', InputOption::VALUE_OPTIONAL, 'Mutation is runned only if the estimated number of bugs in tested file is greater than <bugs>.', '.35'
                 )
@@ -142,7 +141,7 @@ class RunMutatingCommand extends Command
 
         $this->strategy = new ScoreSpecification(
             new Halstead(new Tokenizer(), new TokenType())
-            , $input->getOption('level')
+            , $input->getOption('bugs')
         );
         $this->getApplication()->getDispatcher()->addSubscriber($this->strategy);
 

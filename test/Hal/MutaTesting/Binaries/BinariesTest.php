@@ -42,7 +42,7 @@ class BinariesTest extends \PHPUnit_Framework_TestCase {
 
     public function testICanRunBin() {
 
-        $command = sprintf('php %1$s   %2$s %3$s %4$s --level=0'
+        $command = sprintf('php %1$s   %2$s %3$s %4$s --bugs=0'
             , $this->getBin()
             , 'phpunit'
             , $this->getAdapter('phpunit')
