@@ -39,8 +39,8 @@ class UnitInfo
             return false;
         }
 
-        $dMap = new \Datetime(fileatime($this->file));
-        $dUnit = new \DateTime(fileatime($unit->getFile()));
+        $dMap = \DateTime::createFromFormat('U', filemtime($this->file));
+        $dUnit = \DateTime::createFromFormat('U', filemtime($unit->getFile()));
         return $dUnit < $dMap;
 
     }
