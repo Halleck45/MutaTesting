@@ -74,15 +74,9 @@ Note that you don't need to use the `-d` or `-f` option with atoum...
 In order to avoid to have too much mutants, MutaTesting uses [PhpMetrics](https://github.com/Halleck45/PhpMetrics) in order
 to estimate number of bugs in each tested file, and focuses only on files that contain more anomalies.
 
-You can use --level
+You can use the `--bugs` option to define the limit to use.
 
-There is only one strategy today : the Random strategy. 
-
-To determine to probability of mutations, you can use the `--level` option. `1` = low, `5`= high (default:3)
-
-```bash
-./bin/mutatesting {tool} {binary} {test directory} --level=3
-```
+For example, `--bugs=".6"` means that mutants are preserved only if there is at least 0.6 estimated bugs in the tested file.
 
 #### Formatters
 
