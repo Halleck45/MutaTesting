@@ -100,11 +100,21 @@ class ConsoleSubscriber implements EventSubscriberInterface
 
         // total
         $service = new \Hal\MutaTesting\Mutation\Consolidation\TotalService(($event->getMutations()));
-        if (0 === $service->getSurvivors()->count()) {
-            $this->output->writeln(sprintf("\t<info>score: %s%%</info>", $service->getScore()));
-        } else {
-            $this->output->writeln(sprintf("<error>\tscore: %s%%</error>", $service->getScore()));
+
+
+        switch(true) {
+            case ($service->getScore() > 80):
+                $color = 'info';
+                break;
+            case ($service->getSurvivors()->count() > 50):
+                $color = 'warning';
+                break;
+            default:
+                $color = 'error';
+                break;
         }
+
+        $this->output->writeln(sprintf("\t".'<%2$s>score: %1$s%%</%2$s>', $service->getScore(), $color));
         $this->output->writeln(sprintf("\t%d mutants.", $service->getMutants()->count()));
         $this->output->writeln(sprintf("\t%d survivors.", $service->getSurvivors()->count()));
     }
