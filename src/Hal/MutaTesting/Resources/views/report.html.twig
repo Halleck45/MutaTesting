@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>[{{total.score}}%] Mutation Testing</title>
+        <title>[{{total.score}}%] Mutation Testing by Jean-Fran&ccedil;ois L&eacute;pine</title>
         <style>
 
                 body { 
@@ -24,17 +24,22 @@
                 .diff { border:1px solid #CCC; background-color:#FFF; padding:5px; }
                 .infos { font-size:0.9em; paddin-left:30px; color:#333;}    
                 .testedby { text-align:right; font-size:0.9em; font-style: italic; }
+                 #footer { text-align: center; margin:1em 0; }
             </style>
         </head>
         <body>
 
             <div id="page">
                 <div id="head">
-                    <h1>Score: <span class="score">{{total.score}}%</span></h1>
-                    <h2>( {{total.survivors}} survivors on {{total.mutants}} mutants )</h1>
+                    <h1>MutaTesting score: <span class="score">{{total.score}}%</span></h1>
+                    <p>
+                        <strong>{{ units.all |length }}</strong> tests, <strong>{{ total.mutants }}</strong> mutants,
+                        <strong>{{ total.survivors }}</strong> survivors.
+                    </p>
                 </div>
 
                 <div id="general">
+                    <h2>Overview</h2>
                     <ul>
                     {% for file,info in files  %}
                             <li>
@@ -48,7 +53,8 @@
 
 
 
-                    <div id="detail">
+                    <div id="det-ail">
+                        <h2>Details by file</h2>
                     {% for file,info in files  %}
                             <div id="{{file}}" class="box-mutant">
                                 <h3>{{file}}</h3>
@@ -67,6 +73,9 @@
                         </div>
 
 
+                    <div id="footer">
+                        Powered by <a href="https://github.com/Halleck45/MutaTesting">MutaTesting</a> - Copyright {{"now"|date('Y')}} <a href="http://www.lepine.pro">Jean-Fran&ccedil;ois L&eacute;pine</a>
+                    </div>
 
                     </body>
                 </html>

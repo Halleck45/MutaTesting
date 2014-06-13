@@ -16,6 +16,7 @@ class HtmlSubscriber implements EventSubscriberInterface
     private $filename;
     private $input;
     private $output;
+    private $units;
 
     public function __construct(InputInterface $input, OutputInterface $output, $filename)
     {
@@ -30,9 +31,17 @@ class HtmlSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            'mutate.mutationsDone' => array('onMutationsDone', -1)
+            'mutate.firstrun' => array('onFirstRun', 0)
+            , 'mutate.mutationsDone' => array('onMutationsDone', -1)
         );
     }
+
+
+    public function onFirstRun(FirstRunEvent $event)
+    {
+        $this->units = $event->getUnits();
+    }
+
 
     public function onMutationsDone(\Hal\MutaTesting\Event\MutationsDoneEvent $event)
     {
@@ -80,6 +89,7 @@ class HtmlSubscriber implements EventSubscriberInterface
         $html = $twig->render('report.html.twig', array(
             'files' => $byFile
             , 'total' => $total
+            , 'units' => $this->units
         ));
 
         // write file
