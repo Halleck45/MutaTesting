@@ -19,7 +19,7 @@
         "symfony/event-dispatcher": "~2.0",
         "sebastian/diff": "1.0.*@dev",
         "twig/twig": "1.15",
-        "halleck45/php-metrics": "master"
+        "halleck45/phpmetrics": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*@dev"
