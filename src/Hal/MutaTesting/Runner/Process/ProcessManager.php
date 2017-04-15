@@ -16,9 +16,6 @@ class ProcessManager implements ProcessManagerInterface
 
     public function wait()
     {
-
-//        $process = new \Symfony\Component\Process\Process;
-        ;
         $finished = false;
         while (!$finished) {
             foreach ($this->collection->all() as $n => $process) {
